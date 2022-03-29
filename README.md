@@ -1,6 +1,10 @@
-# crypto-ytt-starter
+# Klaytn_nft_lecture
 
 Klaytn ERC721 BApp
+
+## 공부 시작일
+
+> 2022.03.29
 
 ## 사전준비
 
