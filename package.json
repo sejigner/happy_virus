@@ -8,6 +8,7 @@
     "dev": "webpack-dev-server"
   },
   "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.4",
     "caver-js": "^1.0.0",
     "spin.js": "^4.0.0",
     "truffle": "^5.0.31",
