@@ -76,6 +76,43 @@ const App = {
     }
   },
 
+  handleKaikas: async function () {
+    // 현재 브라우저가 kaikas가 사용되는지 확인
+    if (typeof window.klaytn !== "undefined") {
+      const provider = window["klaytn"];
+    }
+    try {
+      // kaikas와 상호작용해서 모든 공개키 획득
+      // accounts[0] 같이 배열로 접근하여 사용가능
+      const accounts = await window.klaytn.enable();
+      // 현재 kaikas에 선택된 공개키
+      const account = window.klaytn.selectedAddress;
+      console.log(account);
+
+      // caver-js 연결
+      const caver = new Caver(window.klaytn);
+      // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
+      const balance = await caver.klay.getBalance(account);
+      console.log(balance);
+      const privateKey = caver.walletInstance;
+      integrateWallet(privateKey);
+    } catch (error) {
+      console.error(error);
+    }
+
+    useEffect(() => {
+      window.klaytn.on("accountsChanged", function (accounts) {
+        // kaikas에서 계정을 변경할 때 마다 내부의 함수가 실행됩니다.
+        console.log("hey");
+      });
+    });
+
+    const CheckUnlocked = async () => {
+      // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
+      console.log(await window.klaytn._kaikas.isUnlocked());
+    };
+  },
+
   handleLogout: async function () {
     this.removeWallet();
     location.reload();
@@ -101,6 +138,12 @@ const App = {
 
   integrateWallet: function (privateKey) {
     const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
+    cav.klay.accounts.wallet.add(walletInstance);
+    sessionStorage.setItem("walletInstance", JSON.stringify(walletInstance));
+    this.changeUI(walletInstance);
+  },
+
+  integrateWallet: function (walletInstance) {
     cav.klay.accounts.wallet.add(walletInstance);
     sessionStorage.setItem("walletInstance", JSON.stringify(walletInstance));
     this.changeUI(walletInstance);
@@ -179,9 +222,7 @@ const App = {
 
   mintYTT: async function (videoId, author, dateCreated, hash) {
     const sender = this.getWallet();
-    const feePayer = cav.klay.accounts.wallet.add(
-      "0x..."
-    );
+    const feePayer = cav.klay.accounts.wallet.add("0x...");
 
     // using the promise
     const { rawTransaction: senderRawTransaction } =
@@ -383,9 +424,7 @@ const App = {
     try {
       var spinner = this.showSpinner();
       const sender = this.getWallet();
-      const feePayer = cav.klay.accounts.wallet.add(
-        "0x..."
-      );
+      const feePayer = cav.klay.accounts.wallet.add("0x...");
 
       // using the promise
       const { rawTransaction: senderRawTransaction } =
@@ -430,9 +469,7 @@ const App = {
     try {
       var spinner = this.showSpinner();
       const sender = this.getWallet();
-      const feePayer = cav.klay.accounts.wallet.add(
-        "0x..."
-      );
+      const feePayer = cav.klay.accounts.wallet.add("0x...");
 
       // using the promise
       const { rawTransaction: senderRawTransaction } =

@@ -11,7 +11,7 @@
     "caver-js": "^1.0.0",
     "spin.js": "^4.0.0",
     "truffle": "^5.0.31",
-    "truffle-hdwallet-provider-klaytn": "^1.0.13-a"
+    "truffle-hdwallet-provider-klaytn": "^1.4.2"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.6.0",
