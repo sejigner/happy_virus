@@ -143,12 +143,6 @@ const App = {
     this.changeUI(walletInstance);
   },
 
-  integrateWallet: function (walletInstance) {
-    cav.klay.accounts.wallet.add(walletInstance);
-    sessionStorage.setItem("walletInstance", JSON.stringify(walletInstance));
-    this.changeUI(walletInstance);
-  },
-
   reset: function () {
     this.auth = {
       keystore: "",
@@ -211,6 +205,7 @@ const App = {
         title,
         `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
       );
+      // ipfs에 업로드하기 위해 Binary 형태로 변환
       var res = await ipfs.add(Buffer.from(JSON.stringify(metaData)));
       await this.mintYTT(videoId, author, dateCreated, res[0].hash);
       spinner.stop();
@@ -221,8 +216,10 @@ const App = {
   },
 
   mintYTT: async function (videoId, author, dateCreated, hash) {
+    // 배포 계정이 사용자 대신에 가스비 대납 (Fee Delegation)
+    // sender : 호출자(유저), feePayer : 배포자
     const sender = this.getWallet();
-    const feePayer = cav.klay.accounts.wallet.add("0x...");
+    const feePayer = cav.klay.accounts.wallet.add("0x383ba9e9591cc01ecd5ed9bc0b1f9e17cbfded6b8a615ae40511cd13318875af");
 
     // using the promise
     const { rawTransaction: senderRawTransaction } =
