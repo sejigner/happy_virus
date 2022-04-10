@@ -7,14 +7,38 @@ module.exports = {
   entry: "./src/index.js",
   mode: "development",
   output: {
-    filename: "index.js",
+    filename: "bundle.js",
+    publicPath: "/dist/",
     path: path.resolve(__dirname, "dist"),
   },
-  node: {
-    fs: "empty",
+  resolve: {
+    fallback: {
+      constants: false,
+      fs: false,
+      tls: false,
+      net: false,
+      path: false,
+      zlib: false,
+      http: false,
+      https: false,
+      stream: false,
+      crypto: false,
+      electron: false,
+      buffer: require.resolve('buffer/'),
+      "crypto-browserify": false,
+    },
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpg)$/,
+        use: ["file-loader"],
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
+      process: {env: {}},
       DEPLOYED_ADDRESS: JSON.stringify(
         fs.readFileSync("deployedAddress", "utf8").replace(/\n|\r/g, "")
       ),
@@ -30,7 +54,22 @@ module.exports = {
         fs.existsSync("deployedABI_TokenSales") &&
         fs.readFileSync("deployedABI_TokenSales", "utf8"),
     }),
-    new CopyWebpackPlugin([{ from: "./src/index.html", to: "index.html" }]),
+    new CopyWebpackPlugin({
+      patterns: [{ from: "./src/index.html", to: "index.html" }],
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
-  devServer: { contentBase: path.join(__dirname, "dist"), compress: true },
+  devServer: {
+    proxy: {
+      // proxy URLs to backend development server
+      "/api": "http://localhost:8080",
+    },
+    static: {
+      directory: path.join(__dirname, "src"),
+    },
+    // contentBase: path.resolve(__dirname, "src"),
+    compress: true,
+  },
 };
