@@ -2,13 +2,13 @@ const webpack = require("webpack");
 const path = require("path");
 const fs = require("fs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
   mode: "development",
   output: {
-    filename: "bundle.js",
-    publicPath: "/dist/",
+    filename: "[name].min.js",
     path: path.resolve(__dirname, "dist"),
   },
   resolve: {
@@ -19,12 +19,13 @@ module.exports = {
       net: false,
       path: false,
       zlib: false,
-      http: false,
-      https: false,
-      stream: false,
-      crypto: false,
+      os: require.resolve("os-browserify/browser"),
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      stream: require.resolve("stream-browserify"),
+      crypto: require.resolve("crypto-browserify"),
       electron: false,
-      buffer: require.resolve('buffer/'),
+      buffer: require.resolve("buffer/"),
       "crypto-browserify": false,
     },
   },
@@ -34,11 +35,25 @@ module.exports = {
         test: /\.(png|jpg)$/,
         use: ["file-loader"],
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      }
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      minify:
+        process.env.NODE_ENV === "production"
+          ? {
+              collapseWhitespace: true,
+              removeComments: true,
+            }
+          : false,
+    }),
     new webpack.DefinePlugin({
-      process: {env: {}},
+      process: { env: {} },
       DEPLOYED_ADDRESS: JSON.stringify(
         fs.readFileSync("deployedAddress", "utf8").replace(/\n|\r/g, "")
       ),
@@ -55,19 +70,16 @@ module.exports = {
         fs.readFileSync("deployedABI_TokenSales", "utf8"),
     }),
     new CopyWebpackPlugin({
-      patterns: [{ from: "./src/index.html", to: "index.html" }],
+      patterns: [{ from: "./src/riverSunShore.jpg", to: "riverSunShore.jpg" }],
     }),
     new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
+      Buffer: ["buffer", "Buffer"],
     }),
   ],
   devServer: {
-    proxy: {
-      // proxy URLs to backend development server
-      "/api": "http://localhost:8080",
-    },
+    liveReload: true,
     static: {
-      directory: path.join(__dirname, "src"),
+      directory: path.join(__dirname, "dist"),
     },
     // contentBase: path.resolve(__dirname, "src"),
     compress: true,

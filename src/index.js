@@ -1,12 +1,12 @@
-import { Caver } from 'caver-js';
-import { Spinner } from 'spin.js';
-import addImage from './add-image';
-'use strict'
+import Caver from "caver-js";
+import "./style.css";
+import { Spinner } from "spin.js";
+import addImage from "./add-image";
 
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651",
 };
-// const cav = new Caver(config.rpcURL);
+const cav = new Caver(config.rpcURL);
 // const yttContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
 // const tsContract = new cav.klay.Contract(
 //   DEPLOYED_ABI_TOKENSALES,
@@ -105,14 +105,14 @@ const App = {
   },
 
   handleKaikas: async function () {
-        // 현재 브라우저가 kaikas가 사용되는지 확인
+    // 현재 브라우저가 kaikas가 사용되는지 확인
     if (typeof window.klaytn !== "undefined") {
       const provider = window["klaytn"];
     } else {
       // 브라우저 익스텐션 설치 안내
     }
     try {
-      let isKaikasUnlocked = klaytn._kaikas.isUnlocked()
+      let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
       isKaikasUnlocked
         .then(async function (isUnlocked) {
           // kaikas와 상호작용해서 모든 공개키 획득
@@ -146,25 +146,26 @@ const App = {
       console.error(error);
     }
 
-    klaytn.on('accountsChanged', function(accounts) {
+    klaytn.on("accountsChanged", function (accounts) {
       this.changeUIWithWallet(account);
-    })
+    });
   },
 
-  handleLock: function() {
-    this.checkUnlocked().then(true)
-      .catch(error => {
+  handleLock: function () {
+    this.checkUnlocked()
+      .then(true)
+      .catch((error) => {
         return false;
-      })
+      });
   },
 
-  checkUnlocked : async () => {
-      // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
-      const isUnlocked = await window.klaytn._kaikas.isUnlocked();
+  checkUnlocked: async () => {
+    // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
+    const isUnlocked = await window.klaytn._kaikas.isUnlocked();
     return new Promise(function (resolve, reject) {
       resolve(true);
-      })
-    },
+    });
+  },
 
   handleLogout: async function () {
     this.removeWallet();
