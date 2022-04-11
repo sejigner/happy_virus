@@ -2,3 +2,16 @@ body {
     background-color: wheat;
     color: black;
 }
+
+.navbar-brand{
+    vertical-align: middle;
+}
+
+#button-container{
+    float: right; vertical-align: middle;
+}
+
+
+#account-address {
+    float: right;
+}

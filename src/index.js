@@ -1,4 +1,5 @@
 import Caver from "caver-js";
+import CaverExtKAS from "caver-js-ext-kas";
 import "./style.css";
 import { Spinner } from "spin.js";
 import addImage from "./add-image";
@@ -6,8 +7,16 @@ import addImage from "./add-image";
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651",
 };
+
+const accessKeyId = "KASKU7Q44KX5YYU3Z4CICRT9";
+const secretAccessKey = "V-U2Cd5bg9OAdYU8gbXb1YSh9nqI2g4e10joLZgp";
+const chainId = 1001;
+// Cypress 8217
+
 const cav = new Caver(config.rpcURL);
-// const yttContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
+const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
+
+// const ostContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
 // const tsContract = new cav.klay.Contract(
 //   DEPLOYED_ABI_TOKENSALES,
 //   DEPLOYED_ADDRESS_TOKENSALES
@@ -22,218 +31,180 @@ var ipfs = ipfsClient({
 
 const App = {
   auth: {
-    accessType: "keystore",
-    keystore: "",
+    accessType: "kaikas",
+    walletAddress: "",
     password: "",
   },
 
   //#region 계정 인증
 
   start: async function () {
-    this.loadGameMap;
-    const walletFromSession = sessionStorage.getItem("walletInstance");
-    if (walletFromSession) {
+    this.loadGameMap();
+    if (sessionStorage.getItem("isLogout")==="false") {
       try {
-        cav.klay.accounts.wallet.add(JSON.parse(walletFromSession));
-        this.changeUIWithKeystore(JSON.parse(walletFromSession));
+        if (typeof window.klaytn !== "undefined") {
+          const provider = window["klaytn"];
+          const account = await provider.selectedAddress;
+          console.log("account status: " + account);
+          this.changeUIWithWallet(account);
+        }
       } catch (e) {
-        sessionStorage.removeItem("walletInstance");
+        console.log(e);
       }
     }
+    // if (walletFromSession) {
+    //   try {
+    //     cav.klay.accounts.wallet.add(JSON.parse(walletFromSession));
+    //     this.changeUIWithKeystore(JSON.parse(walletFromSession));
+    //   } catch (e) {
+    //     sessionStorage.removeItem("walletInstance");
+    //   }
+    // }
   },
+
+  // integrateWallet: function (privateKey) {
+  //   const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
+  //   cav.klay.accounts.wallet.add(walletInstance);
+  //   sessionStorage.setItem("walletInstance", JSON.stringify(walletInstance));
+  //   this.changeUI(walletInstance);
+  // },
 
   loadGameMap: function () {
     addImage();
   },
 
-  handleImport: async function () {
-    const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0]);
-    fileReader.onload = (event) => {
-      try {
-        if (!this.checkValidKeystore(event.target.result)) {
-          $("#message").text("유효하지 않은 keystore 파일입니다.");
-          return;
-        }
-        this.auth.keystore = event.target.result;
-        $("#message").text("keystore 통과. 비밀번호를 입력하세요.");
-        document.querySelector("#input-password").focus();
-      } catch (event) {
-        $("#message").text("유효하지 않은 keystore 파일입니다.");
-        return;
-      }
-    };
-  },
+  // handleImport: async function () {
+  //   const fileReader = new FileReader();
+  //   fileReader.readAsText(event.target.files[0]);
+  //   fileReader.onload = (event) => {
+  //     try {
+  //       if (!this.checkValidKeystore(event.target.result)) {
+  //         $("#message").text("유효하지 않은 keystore 파일입니다.");
+  //         return;
+  //       }
+  //       this.auth.keystore = event.target.result;
+  //       $("#message").text("keystore 통과. 비밀번호를 입력하세요.");
+  //       document.querySelector("#input-password").focus();
+  //     } catch (event) {
+  //       $("#message").text("유효하지 않은 keystore 파일입니다.");
+  //       return;
+  //     }
+  //   };
+  // },
 
-  handlePassword: async function () {
-    this.auth.password = event.target.value;
-  },
+  // handlePassword: async function () {
+  //   this.auth.password = event.target.value;
+  // },
 
-  handleLogin: async function () {
-    if (this.auth.accessType === "keystore") {
-      try {
-        const privateKey = cav.klay.accounts.decrypt(
-          this.auth.keystore,
-          this.auth.password
-        ).privateKey;
-        this.integrateWallet(privateKey);
-      } catch (e) {
-        $("#message").text("비밀번호가 일치하지 않습니다.");
-      }
-    }
-  },
+  // handleLogin: async function () {
+  //   if (this.auth.accessType === "keystore") {
+  //     try {
+  //       const privateKey = cav.klay.accounts.decrypt(
+  //         this.auth.keystore,
+  //         this.auth.password
+  //       ).privateKey;
+  //       this.integrateWallet(privateKey);
+  //     } catch (e) {
+  //       $("#message").text("비밀번호가 일치하지 않습니다.");
+  //     }
+  //   }
+  // },
 
-  handleMetaMask: async function () {
-    if (typeof window.ethereum !== "undefined") {
-      console.log("MetaMask is installed!");
-    }
-    try {
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const account = accounts[0];
-      // caver-js 연결
-      const _web3 = new Web3(window.ethereum);
-      // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
-      const balance = await _web3.ethereum.getBalance(account);
-      console.log(balance);
-      const privateKey = _web3.walletInstance;
-      this.integrateWallet(privateKey);
-    } catch (e) {
-      console.error(error);
-    }
-  },
+  // handleMetaMask: async function () {
+  //   if (typeof window.ethereum !== "undefined") {
+  //     console.log("MetaMask is installed!");
+  //   }
+  //   try {
+  //     const accounts = await ethereum.request({
+  //       method: "eth_requestAccounts",
+  //     });
+  //     const account = accounts[0];
+  //     // caver-js 연결
+  //     const _web3 = new Web3(window.ethereum);
+  //     // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
+  //     const balance = await _web3.ethereum.getBalance(account);
+  //     console.log(balance);
+  //     const privateKey = _web3.walletInstance;
+  //     this.integrateWallet(privateKey);
+  //   } catch (e) {
+  //     console.error(error);
+  //   }
+  // },
 
   handleKaikas: async function () {
-    // 현재 브라우저가 kaikas가 사용되는지 확인
-    if (typeof window.klaytn !== "undefined") {
-      const provider = window["klaytn"];
+    if (typeof window["klaytn"] !== "undefined") {
+      if (typeof window.klaytn !== "undefined") {
+        // const provider = window["klaytn"];
+        console.log("klaytn extension exists.");
+      } else {
+        // 브라우저 익스텐션 설치 안내
+      }
+      try {
+        let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
+        isKaikasUnlocked
+          .then(async function (isUnlocked) {
+            console.log("isUnlocked : " + isUnlocked);
+            // kaikas와 상호작용해서 모든 공개키 획득
+            // accounts[0] 같이 배열로 접근하여 사용가능
+            const accounts = await window.klaytn.enable();
+            // 현재 kaikas에 선택된 공개키
+            const account = await window.klaytn.selectedAddress;
+            console.log(account);
+            if (await klaytn._kaikas.isEnabled()) {
+              sessionStorage.setItem("isLogout", false);
+            }
+            // caver-js 연결
+            const caver = new Caver(provider);
+            // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
+            const balance = await caver.klay.getBalance(account);
+            console.log(balance);
+            this.changeUIWithWallet(account);
+          })
+          .catch(async (error) => {
+            console.log(error);
+            const accounts = await window.klaytn.enable();
+            // 현재 kaikas에 선택된 공개키
+            const account = await window.klaytn.selectedAddress;
+            console.log(account);
+
+            // caver-js 연결
+            const caver = new Caver(window.klaytn);
+            // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
+            const balance = await caver.klay.getBalance(account);
+            console.log(balance);
+            this.changeUIWithWallet(account);
+          });
+      } catch (error) {
+        console.error(error);
+      }
     } else {
-      // 브라우저 익스텐션 설치 안내
+      alert("카이카스 지갑 확장 프로그램을 먼저 설치해주세요.");
     }
-    try {
-      let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
-      isKaikasUnlocked
-        .then(async function (isUnlocked) {
-          // kaikas와 상호작용해서 모든 공개키 획득
-          // accounts[0] 같이 배열로 접근하여 사용가능
-          const accounts = await window.klaytn.enable();
-          // 현재 kaikas에 선택된 공개키
-          const account = await window.klaytn.selectedAddress;
-          console.log(account);
-
-          // caver-js 연결
-          const caver = new Caver(window.klaytn);
-          // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
-          const balance = await caver.klay.getBalance(account);
-          console.log(balance);
-          this.changeUIWithWallet(account);
-        })
-        .catch(async (error) => {
-          const accounts = await window.klaytn.enable();
-          // 현재 kaikas에 선택된 공개키
-          const account = await window.klaytn.selectedAddress;
-          console.log(account);
-
-          // caver-js 연결
-          const caver = new Caver(window.klaytn);
-          // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
-          const balance = await caver.klay.getBalance(account);
-          console.log(balance);
-          this.changeUIWithWallet(account);
-        });
-    } catch (error) {
-      console.error(error);
-    }
-
-    klaytn.on("accountsChanged", function (accounts) {
-      this.changeUIWithWallet(account);
-    });
-  },
-
-  handleLock: function () {
-    this.checkUnlocked()
-      .then(true)
-      .catch((error) => {
-        return false;
-      });
-  },
-
-  checkUnlocked: async () => {
-    // 지갑이 연결되어있다면 true, 아니라면 false를 리턴합니다.
-    const isUnlocked = await window.klaytn._kaikas.isUnlocked();
-    return new Promise(function (resolve, reject) {
-      resolve(true);
-    });
   },
 
   handleLogout: async function () {
+    sessionStorage.setItem("isLogout", "true");
     this.removeWallet();
-    location.reload();
+    location.reload(); 
   },
 
-  getWallet: function () {
-    if (cav.klay.accounts.wallet.length) {
-      return cav.klay.accounts.wallet[0];
-    }
-  },
+  
 
-  checkValidKeystore: function (keystore) {
-    const parsedKeystore = JSON.parse(keystore);
-
-    const isValidKeystore =
-      parsedKeystore.version &&
-      parsedKeystore.id &&
-      parsedKeystore.address &&
-      parsedKeystore.keyring;
-
-    return isValidKeystore;
-  },
-
-  integrateWallet: function (privateKey) {
-    const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
-    cav.klay.accounts.wallet.add(walletInstance);
-    sessionStorage.setItem("walletInstance", JSON.stringify(walletInstance));
-    this.changeUIWithKeystore(walletInstance);
-  },
-
-  reset: function () {
-    this.auth = {
-      keystore: "",
-      password: "",
-    };
-  },
-
-  changeUIWithKeystore: async function (walletInstance) {
-    $("#loginModal").modal("hide");
-    $("#login").hide();
-    $("#logout").show();
-    $(".afterLogin").show();
-    $("#address").append(
-      "<br>" + "<p>" + "내 계정 주소: " + walletInstance.address + "</p>"
-    );
-    await this.displayMyTokens(walletInstance.address);
-    // await this.displayAllTokens(walletInstance);
-    // await this.checkApproval(walletInstance);
-  },
-
+  // webpack에서 처리해줘야할 듯
   changeUIWithWallet: async function (account) {
-    $("#loginModal").modal("hide");
-    $("#login").hide();
-    $("#kaikas").hide();
-    $("#metamask").hide();
-    $("#logout").show();
-    $(".afterLogin").show();
-    $("#address").append("<br>" + "<p>" + "내 계정 주소: " + account + "</p>");
+    document.getElementById("login").style.display = "none";
+    document.getElementById("logout").style.display = "inline";
+    document.getElementsByClassName("afterLogin")[0].style.display = "block";
+    document.getElementById("wallet-address").innerHTML = account;
     await this.displayMyTokens(account);
+
+    // $("#wallet-address").append("<br>" + "<p>" + "내 계정 주소: " + account + "</p>");
     // await this.displayAllTokensWithWallet(account);
     // await this.checkApprovalWithWallet(account);
   },
 
   removeWallet: function () {
     cav.klay.accounts.wallet.clear();
-    sessionStorage.removeItem("walletInstance");
-    this.reset();
   },
 
   showSpinner: function () {
@@ -246,7 +217,8 @@ const App = {
     var balance = parseInt(await this.getBalanceOf(account));
 
     if (balance === 0) {
-      $("#myTokens").text("현재 보유한 토큰이 없습니다");
+      document.getElementById("myTokens").style.innerHTML =
+        "현재 보유한 토큰이 없습니다";
     } else {
       for (var i = 0; i < balance; i++) {
         (async () => {
@@ -344,9 +316,27 @@ const App = {
 window.App = App;
 
 window.addEventListener("load", function () {
-  App.start();
-  $("#tabs").tabs().css({ overflow: "auto" });
+  try {
+    App.start();
+    let tab = document.getElementById("tabs");
+    tab.style.overflow = "auto";
+  } catch (e) {
+    console.log(e);
+  }
 });
+
+// klaytn.on("accountsChanged", function (accounts) {
+//   if
+//   try {
+//     App.changeUIWithWallet(accounts[0])
+//   } catch (e) {
+//     console.log(e)
+//   }
+// });
+
+// window.onbeforeunload = function (event) { 
+// }
+
 
 var opts = {
   lines: 10, // The number of lines to draw
