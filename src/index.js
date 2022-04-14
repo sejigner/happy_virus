@@ -38,13 +38,11 @@ const App = {
   auth: {
     accessType: "kaikas",
     walletAddress: "",
-    password: "",
   },
 
   //#region 계정 인증
 
   start: async function () {
-    this.loadGameMap();
     if (sessionStorage.getItem("isLogout")==="false") {
       try {
         if (typeof window.klaytn !== "undefined") {
@@ -148,21 +146,11 @@ const App = {
         let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
         isKaikasUnlocked
           .then(async function (isUnlocked) {
-            console.log("isUnlocked : " + isUnlocked);
-            // kaikas와 상호작용해서 모든 공개키 획득
-            // accounts[0] 같이 배열로 접근하여 사용가능
-            const accounts = await window.klaytn.enable();
-            // 현재 kaikas에 선택된 공개키
             const account = await window.klaytn.selectedAddress;
-            console.log(account);
             if (await klaytn._kaikas.isEnabled()) {
               sessionStorage.setItem("isLogout", false);
             }
-            // caver-js 연결
-            const caver = new Caver(provider);
-            // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
-            const balance = await caver.klay.getBalance(account);
-            console.log(balance);
+            this.auth.walletAddress = account;
             this.changeUIWithWallet(account);
           })
           .catch(async (error) => {
@@ -170,13 +158,7 @@ const App = {
             const accounts = await window.klaytn.enable();
             // 현재 kaikas에 선택된 공개키
             const account = await window.klaytn.selectedAddress;
-            console.log(account);
-
-            // caver-js 연결
-            const caver = new Caver(window.klaytn);
-            // caver 함수 중 현재 공개키의 klay양을 리턴하는 함수
-            const balance = await caver.klay.getBalance(account);
-            console.log(balance);
+            this.auth.walletAddress = account;
             this.changeUIWithWallet(account);
           });
       } catch (error) {
@@ -189,13 +171,11 @@ const App = {
 
   handleLogout: async function () {
     sessionStorage.setItem("isLogout", "true");
+    this.auth.walletAddress = "";
     this.removeWallet();
     location.reload(); 
   },
 
-  
-
-  // webpack에서 처리해줘야할 듯
   changeUIWithWallet: async function (account) {
     document.getElementById("login").style.display = "none";
     document.getElementById("logout").style.display = "inline";
@@ -219,7 +199,11 @@ const App = {
   //#endregion
 
   displayMyTokens: async function (account) {
-    var balance = parseInt(await this.getBalanceOf(account));
+    const tokenList = await this.getTokenListByOwner(
+      nftAddress,
+      account
+    );
+    const balance = tokenList.length;
 
     if (balance === 0) {
       document.getElementById("myTokens").style.innerHTML =
@@ -227,9 +211,10 @@ const App = {
     } else {
       for (var i = 0; i < balance; i++) {
         (async () => {
-          var tokenId = await this.getTokenOfOwnerByIndex(account, i);
-          var tokenUri = await this.getTokenUri(tokenId);
-          var metadata = await this.getMetadata(tokenUri);
+          let token = tokenList[i];
+          let tokenId = token.tokenId;
+          let tokenUri = token.tokenUri;
+          let metadata = await this.getMetadata(tokenUri);
           this.renderMyTokens(tokenId, metadata);
         })();
       }
@@ -270,8 +255,9 @@ const App = {
     // return await ostContract.methods.balanceOf(address).call();
   },
 
-  getTokenOfOwnerByIndex: async function (address, index) {
-    return await caverExtKas.kas.kip17.getTokenListByOwner(address);
+  getTokenListByOwner: async function (address, owner) {
+    // getTokenListByOwner(addressOrAlias, owner) address : the contract address of the NFT
+    return await caverExtKas.kas.kip17.getTokenListByOwner(address, owner);
     // return await ostContract.methods.tokenOfOwnerByIndex(address, index).call();
   },
 
