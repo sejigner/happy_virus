@@ -11,6 +11,13 @@ body {
     float: right; vertical-align: middle;
 }
 
+#game-map {
+    padding: 1em;
+    display:block;
+	width:100%;
+	height:auto;
+}
+
 
 #account-address {
     float: right;

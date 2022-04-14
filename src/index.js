@@ -318,6 +318,7 @@ window.App = App;
 window.addEventListener("load", function () {
   try {
     App.start();
+    App.loadGameMap();
     let tab = document.getElementById("tabs");
     tab.style.overflow = "auto";
   } catch (e) {
