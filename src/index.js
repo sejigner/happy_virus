@@ -232,9 +232,9 @@ const App = {
   },
 
   renderMyTokens: function (tokenId, metadata) {
-    var tokens = $("#myTokens");
-    var template = $("#MyTokensTemplate");
-    this.getBasicTemplate(template, tokenId, metadata);
+    let tokens = document.getElementById("myTokens")
+    let template = document.getElementById("MyTokensTemplate");
+    this.getBasicTemplate(tokenId, metadata);
 
     tokens.append(template.html());
   },
@@ -298,16 +298,24 @@ const App = {
     });
   },
 
-  getBasicTemplate: function (template, tokenId, metadata) {
-    template.find(".panel-heading").text("#" + tokenId);
-    template.find("img").attr("src", metadata.properties.image.description);
-    template
-      .find("img")
-      .attr("title", metadata.properties.description.description);
-    template.find(".title").text(metadata.properties.name.description);
-    template
-      .find(".description")
-      .text(metadata.properties.description.description);
+  getBasicTemplate: function (tokenId, metadata) {
+    document.getElementsByClassName("card-title").innerHTML =
+      metadata.properties.name.description;
+    document.getElementsByClassName("card-img-top").src =
+      metadata.properties.image.description;
+    document.getElementsByClassName("token-id").innerHTML = '#' + tokenId;
+    document.getElementsByClassName("token-description").innerHTML = metadata.properties.description.description;
+      
+    // template.find(".card-title").text("#" + tokenId);
+    // template.find("img").attr("src", metadata.properties.image.description);
+    // template
+    //   .find("img")
+    //   .attr("title", metadata.properties.description.description);
+    // template.find(".title").text(metadata.properties.name.description);
+    // template.find(".video-id").text(metadata.properties.name.description);
+    // template
+    //   .find(".description")
+    //   .text(metadata.properties.description.description);
     // template.find(".author").text(ytt[0]);
     // template.find(".date-created").text(ytt[1]);
   },
