@@ -10,8 +10,13 @@ const config = {
 
 const accessKeyId = "KASKU7Q44KX5YYU3Z4CICRT9";
 const secretAccessKey = "V-U2Cd5bg9OAdYU8gbXb1YSh9nqI2g4e10joLZgp";
-const chainId = 1001;
-// Cypress 8217
+// Cypress 8217 Baobab 1001
+const chainId = 8217;
+// NFT 발행 후 NFT 컨트랙트 address 입력
+// Krafterspace : 0x9faccd9f9661dddec3971c1ee146516127c34fc1
+// KIP17 API를 활용해 조회하려면, 해당 계정이 배포한 컨트랙트만 조회가능합니다.
+const nftAddress = '0x9faccd9f9661dddec3971c1ee146516127c34fc1';
+
 
 const cav = new Caver(config.rpcURL);
 const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
