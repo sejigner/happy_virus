@@ -2,7 +2,8 @@ import Caver from "caver-js";
 import CaverExtKAS from "caver-js-ext-kas";
 import "./style.css";
 import { Spinner } from "spin.js";
-import addImage from "./add-image";
+import { addMap } from "./handle-map";
+import { divideMap } from "./handle-map";
 
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651",
@@ -73,7 +74,8 @@ const App = {
   // },
 
   loadGameMap: function () {
-    addImage();
+    addMap();
+    divideMap();
   },
 
   // handleImport: async function () {
