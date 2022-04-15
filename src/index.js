@@ -44,13 +44,19 @@ const App = {
   //#region 계정 인증
 
   start: async function () {
-    if (sessionStorage.getItem("isLogout")==="false") {
+    if (sessionStorage.getItem("isLogout") === "false") {
       try {
         if (typeof window.klaytn !== "undefined") {
           const provider = window["klaytn"];
           const account = await provider.selectedAddress;
           console.log("account status: " + account);
-          this.changeUIWithWallet(account);
+          if (typeof account !== "undefined") {
+            this.changeUIWithWallet(account);
+          } else {
+            this.handleLogout();
+          }
+        } else {
+          this.handleLogout();
         }
       } catch (e) {
         console.log(e);
@@ -173,15 +179,18 @@ const App = {
 
   handleLogout: async function () {
     sessionStorage.setItem("isLogout", "true");
+    document.getElementById("wallet-address").innerHTML = "";
+    document.getElementById("wallet-address").style.display = "none";
     this.auth.walletAddress = "";
     this.removeWallet();
-    location.reload(); 
+    location.reload();
   },
 
   changeUIWithWallet: async function (account) {
     document.getElementById("login").style.display = "none";
     document.getElementById("logout").style.display = "inline";
     document.getElementsByClassName("afterLogin")[0].style.display = "block";
+    document.getElementById("wallet-address").style.display = "block";
     document.getElementById("wallet-address").innerHTML = account;
     await this.displayMyTokens(account);
 
