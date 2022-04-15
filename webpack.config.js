@@ -32,13 +32,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(png|jpg)$/,
+        test: /\.(png|jpg|svg)$/,
         use: ["file-loader"],
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      }
+        use: ["style-loader", "css-loader"],
+      },
     ],
   },
   plugins: [
