@@ -16,8 +16,7 @@ const chainId = 8217;
 // NFT 발행 후 NFT 컨트랙트 address 입력
 // Krafterspace : 0x9faccd9f9661dddec3971c1ee146516127c34fc1
 // KIP17 API를 활용해 조회하려면, 해당 계정이 배포한 컨트랙트만 조회가능합니다.
-const nftAddress = '0x9faccd9f9661dddec3971c1ee146516127c34fc1';
-
+const nftAddress = "0x9faccd9f9661dddec3971c1ee146516127c34fc1";
 
 const cav = new Caver(config.rpcURL);
 const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
@@ -210,10 +209,7 @@ const App = {
   //#endregion
 
   displayMyTokens: async function (account) {
-    const tokenList = await this.getTokenListByOwner(
-      nftAddress,
-      account
-    );
+    const tokenList = await this.getTokenListByOwner(nftAddress, account);
     const balance = tokenList.length;
 
     if (balance === 0) {
@@ -233,7 +229,7 @@ const App = {
   },
 
   renderMyTokens: function (tokenId, metadata) {
-    let tokens = document.getElementById("myTokens")
+    let tokens = document.getElementById("myTokens");
     let template = document.getElementById("MyTokensTemplate");
     this.getBasicTemplate(tokenId, metadata);
 
@@ -305,9 +301,10 @@ const App = {
       metadata.properties.name.description;
     document.getElementsByClassName("card-img-top").src =
       metadata.properties.image.description;
-    document.getElementsByClassName("token-id").innerHTML = '#' + tokenId;
-    document.getElementsByClassName("token-description").innerHTML = metadata.properties.description.description;
-      
+    document.getElementsByClassName("token-id").innerHTML = "#" + tokenId;
+    document.getElementsByClassName("token-description").innerHTML =
+      metadata.properties.description.description;
+
     // template.find(".card-title").text("#" + tokenId);
     // template.find("img").attr("src", metadata.properties.image.description);
     // template
@@ -345,9 +342,8 @@ window.addEventListener("load", function () {
 //   }
 // });
 
-// window.onbeforeunload = function (event) { 
+// window.onbeforeunload = function (event) {
 // }
-
 
 var opts = {
   lines: 10, // The number of lines to draw
