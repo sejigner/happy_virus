@@ -157,7 +157,6 @@ const App = {
             if (await klaytn._kaikas.isEnabled()) {
               sessionStorage.setItem("isLogout", false);
             }
-            this.auth.walletAddress = account;
             this.changeUIWithWallet(account);
           })
           .catch(async (error) => {
@@ -209,22 +208,30 @@ const App = {
   //#endregion
 
   displayMyTokens: async function (account) {
-    const tokenList = await this.getTokenListByOwner(nftAddress, account);
-    const balance = tokenList.length;
-
-    if (balance === 0) {
-      document.getElementById("myTokens").style.innerHTML =
-        "현재 보유한 토큰이 없습니다";
-    } else {
-      for (var i = 0; i < balance; i++) {
-        (async () => {
-          let token = tokenList[i];
-          let tokenId = token.tokenId;
-          let tokenUri = token.tokenUri;
-          let metadata = await this.getMetadata(tokenUri);
-          this.renderMyTokens(tokenId, metadata);
-        })();
+    let balance = 0;
+    try {
+      // const tokenList = await this.getTokenListByOwner(nftAddress, account);
+      const tokenList = await caverExtKas.kas.tokenHistory.getNFTListByOwner(
+        nftAddress,
+        account
+      );
+      balance = tokenList.items.length;
+      if (balance === 0) {
+        document.getElementById("myTokens").innerHTML =
+          "현재 보유한 토큰이 없습니다";
+      } else {
+        for (var i = 0; i < balance; i++) {
+          (async () => {
+            let token = tokenList.items[i];
+            let tokenId = token.tokenId;
+            let tokenUri = token.tokenUri;
+            let metadata = await this.getMetadata(tokenUri);
+            this.renderMyTokens(tokenId, metadata);
+          })();
+        }
       }
+    } catch (e) {
+      console.log(e);
     }
   },
 
@@ -290,20 +297,26 @@ const App = {
 
   getMetadata: function (tokenUri) {
     return new Promise((resolve) => {
-      $.getJSON(tokenUri, (data) => {
-        resolve(data);
-      });
+      fetch(tokenUri)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          resolve(data);
+        });
+      // $.getJSON(tokenUri, (data) => {
+      //   resolve(data);
+      // });
     });
   },
 
   getBasicTemplate: function (tokenId, metadata) {
     document.getElementsByClassName("card-title").innerHTML =
-      metadata.properties.name.description;
+      metadata.name.description;
     document.getElementsByClassName("card-img-top").src =
-      metadata.properties.image.description;
+      metadata.image.description;
     document.getElementsByClassName("token-id").innerHTML = "#" + tokenId;
     document.getElementsByClassName("token-description").innerHTML =
-      metadata.properties.description.description;
+      metadata.description.description;
 
     // template.find(".card-title").text("#" + tokenId);
     // template.find("img").attr("src", metadata.properties.image.description);
