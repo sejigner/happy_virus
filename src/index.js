@@ -34,6 +34,43 @@ var ipfs = ipfsClient({
   protocol: "https",
 });
 
+const Dummy = {
+  region: {
+    "1,1": 500000,
+    "1,2": 100000,
+    "1,3": 400000,
+    "1,4": 500000,
+    "1,5": 700000,
+    "1,6": 800000,
+    "1,7": 100000,
+    "1,8": 500000,
+    "2,1": 0,
+    "2,2": 500000,
+    "2,3": 500000,
+    "2,4": 500000,
+    "2,5": 500000,
+    "2,6": 500000,
+    "2,7": 500000,
+    "2,8": 500000,
+    "3,1": 0,
+    "3,2": 0,
+    "3,3": 200566,
+    "3,4": 6504,
+    "3,5": 165284,
+    "3,6": 2135,
+    "3,7": 541,
+    "3,8": 4658,
+    "4,1": 0,
+    "4,2": 0,
+    "4,3": 65,
+    "4,4": 77,
+    "4,5": 46,
+    "4,6": 100,
+    "4,7": 0,
+    "4,8": 0,
+  },
+};
+
 const App = {
   auth: {
     accessType: "kaikas",
@@ -247,13 +284,15 @@ const App = {
       // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
       let m = document.querySelector("#all-nfts");
       let template = document.querySelector("#NftCardTemplate");
-      
+
       // 새로운 열을 복제하고 테이블에 삽입합니다.
       let clone = template.content.cloneNode(true);
       clone.querySelector(".card-img-top").src = metadata.image;
-      clone.querySelector(".card-title").innerHTML = "<strong>"+ metadata.name+"</strong>";
+      clone.querySelector(".card-title").innerHTML =
+        "<strong>" + metadata.name + "</strong>";
       clone.querySelector(".token-id").innerHTML = tokenId;
-      clone.querySelector(".token-description").innerHTML = metadata.description;
+      clone.querySelector(".token-description").innerHTML =
+        metadata.description;
 
       m.appendChild(clone);
     } else {
@@ -328,6 +367,23 @@ const App = {
     });
   },
 
+  fetchRegionInfo: function () {
+    let test = document.getElementsByClassName("grid-item");
+    console.log(test);
+    [].forEach.call(test, function (element) {
+      element.onclick = function () {
+        let id = element.id;
+        let population = Dummy.region[id];
+        if (population !== 0) {
+          let modal = document.getElementById("modal");
+          document.getElementsByClassName("total-fans").innerHTML = population;
+          modal.style.display = "flex";
+          // alert("Left potential fans: " + population);
+        }
+      };
+    });
+  },
+
   getBasicTemplate: function (tokenId, metadata) {
     document.getElementsByClassName("card-title").innerHTML = metadata.name;
     document.getElementsByClassName("card-img-top").src = metadata.image;
@@ -356,14 +412,29 @@ window.addEventListener("load", function () {
   try {
     App.start();
     App.loadGameMap();
+    App.fetchRegionInfo();
   } catch (e) {
     console.log(e);
   }
 });
 
+const closeBtn = modal.querySelector(".close-area");
+closeBtn.addEventListener("click", (e) => {
+  modal.style.display = "none";
+});
 
+modal.addEventListener("click", (e) => {
+  const evTarget = e.target;
+  if (evTarget.classList.contains("modal-overlay")) {
+    modal.style.display = "none";
+  }
+});
 
-
+window.addEventListener("keyup", (e) => {
+  if (modal.style.display === "flex" && e.key === "Escape") {
+    modal.style.display = "none";
+  }
+});
 
 // klaytn.on("accountsChanged", function (accounts) {
 //   if
