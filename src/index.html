@@ -19,67 +19,79 @@
     </div>
 
     <div class="container" style="vertical-align: middle;">
-      <a id="navbar-brand"
-        href="" style="color: whitesmoke; font-size: 3em;">NFDOL</a>
-        <p id="wallet-address" style="color:whitesmoke; vertical-align: middle; margin: 0;"></p>
+      <a id="navbar-brand" href="" style="color: whitesmoke; font-size: 3em;">NFDOL</a>
+      <p id="wallet-address" style="color:whitesmoke; vertical-align: middle; margin: 0;"></p>
       <div id="button-container">
-        <button type="button" id="logout" style="display: none; background-color: whitesmoke;" onclick="App.handleLogout()">
+        <button type="button" id="logout" style="display: none; background-color: whitesmoke;"
+          onclick="App.handleLogout()">
           Kaikas Logout
         </button>
         <button type="button" id="login" style="background-color: whitesmoke;" onclick="App.handleKaikas()">
           Kaikas Login
         </button>
       </div>
-      
+
     </div>
   </nav>
 
   <div class="container-fluid" id="game-map">
     <div id="map-img" style="position:relative">
-    <div class="wrapper" id="map-grid" style="position: absolute;">
-    </div></div>
-    
-  </div>
-
-  <div class="container">
-
-    <div class="row">
-      <div class="afterLogin" style="display: none;">
-        <div id="tabs">
-          <ul>
-            <li><a href="#myTokens">보유 토큰</a></li>
-            <li><a href="#myTokensSale">사용 중인 토큰</a></li>
-          </ul>
-          <div id="myTokens"></div>
-          <div id="myTokensSale"></div>
-        </div>
+      <div class="wrapper" id="map-grid" style="position: absolute;">
       </div>
     </div>
 
-    <!-- <div class="map-wrapper">
-      <div class="map" id="map-img">
-        <img src="/src/riverSunShore.jpg">
+  </div>
+
+
+
+  <div class="container-fluid" id="nft-container">
+    <div class="afterLogin" style="display: none;">
+
+      <ul class="nav nav" id="token-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" aria-current="page">모든 NFT</a>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <a class="nav-link">사용 중인 NFT</a>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="tabContent">
+        <div id="all-nfts"></div>
+        <div id="nfts-in-use" style="display: non;">
+        </div>
+
       </div>
-    </div> -->
+    </div>
 
     <div id="spin"></div>
   </div>
+
+  <div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">...</div>
+    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">...</div>
+    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
+  </div>
+
 </body>
 <!-- 부트스트랩 패널을 이용한 템플릿 활용 -->
-<div id="MyTokensTemplate" style="display: none;">
-  <div class="col-sm-6 col-md-4 col-lg-3">
-    <div class="card" style="width:18rem;"> <!-- panel panel-primary -->
-      <img id="nft-img" src="" class="card-img-top" alt="">
-      <div class="card-body">
-        <h5 class="card-title">Card Title</h5>>
-          <br /><br />
-          <strong>Token ID</strong>: <span class="token-id"></span><br />
-          <strong>소개</strong>: <span class="token-description"></span><br />
-          <a href="#" class="btn btn-primary">Use to play</a>
+<template id="NftCardTemplate">
+  <div class="card" style="width:18rem;">
+    <img id="nft-img" src="" class="card-img-top" alt="">
+    <div class="card-body">
+      <h5 class="card-title">Card Title</h5>
+      <br />
+      Token: <span class="token-id"></span><br/>
+      Description: <span class="token-description"></span><br />
+      <br/>
+      <div class="d-grid gap-2">
+        <a href="#" class="btn btn-primary" style="margin: auto; width: fit-content;">Use to play</a>
       </div>
+      
     </div>
   </div>
-</div>
+</template>
 
 <div id="MyTokensSaleTemplate" style="display: none;">
   <div class="col-sm-6 col-md-4 col-lg-3">
@@ -102,6 +114,8 @@
 <!-- Templates -->
 
 </html>
+
+
 
 <style>
   @keyframes spinner-line-fade-more {

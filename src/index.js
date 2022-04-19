@@ -220,13 +220,13 @@ const App = {
         document.getElementById("myTokens").innerHTML =
           "현재 보유한 토큰이 없습니다";
       } else {
-        for (var i = 0; i < balance; i++) {
+        for (let i = 0; i < balance; i++) {
           (async () => {
-            let token = tokenList.items[i];
-            let tokenId = token.tokenId;
-            let tokenUri = token.tokenUri;
-            let metadata = await this.getMetadata(tokenUri);
-            this.renderMyTokens(tokenId, metadata);
+            const token = tokenList.items[i];
+            const tokenId = token.tokenId;
+            const tokenUri = token.tokenUri;
+            const metadata = await this.getMetadata(tokenUri);
+            this.renderNftList(tokenId, metadata);
           })();
         }
       }
@@ -239,8 +239,27 @@ const App = {
     let tokens = document.getElementById("myTokens");
     let template = document.getElementById("MyTokensTemplate");
     this.getBasicTemplate(tokenId, metadata);
+    tokens.appendChild(template);
+  },
 
-    tokens.append(template.html());
+  renderNftList: function (tokenId, metadata) {
+    if ("content" in document.createElement("template")) {
+      // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
+      let m = document.querySelector("#all-nfts");
+      let template = document.querySelector("#NftCardTemplate");
+      
+      // 새로운 열을 복제하고 테이블에 삽입합니다.
+      let clone = template.content.cloneNode(true);
+      clone.querySelector(".card-img-top").src = metadata.image;
+      clone.querySelector(".card-title").innerHTML = "<strong>"+ metadata.name+"</strong>";
+      clone.querySelector(".token-id").innerHTML = tokenId;
+      clone.querySelector(".token-description").innerHTML = metadata.description;
+
+      m.appendChild(clone);
+    } else {
+      // HTML 템플릿 엘리먼트를 지원하지 않으므로
+      // 테이블에 열을 추가하는 다른 방법을 찾습니다.
+    }
   },
 
   getERC721MetadataSchema: function (description, title, imgUrl) {
@@ -310,13 +329,11 @@ const App = {
   },
 
   getBasicTemplate: function (tokenId, metadata) {
-    document.getElementsByClassName("card-title").innerHTML =
-      metadata.name.description;
-    document.getElementsByClassName("card-img-top").src =
-      metadata.image.description;
+    document.getElementsByClassName("card-title").innerHTML = metadata.name;
+    document.getElementsByClassName("card-img-top").src = metadata.image;
     document.getElementsByClassName("token-id").innerHTML = "#" + tokenId;
     document.getElementsByClassName("token-description").innerHTML =
-      metadata.description.description;
+      metadata.description;
 
     // template.find(".card-title").text("#" + tokenId);
     // template.find("img").attr("src", metadata.properties.image.description);
@@ -339,12 +356,14 @@ window.addEventListener("load", function () {
   try {
     App.start();
     App.loadGameMap();
-    let tab = document.getElementById("tabs");
-    tab.style.overflow = "auto";
   } catch (e) {
     console.log(e);
   }
 });
+
+
+
+
 
 // klaytn.on("accountsChanged", function (accounts) {
 //   if
