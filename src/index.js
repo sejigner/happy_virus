@@ -27,12 +27,12 @@ const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
 //   DEPLOYED_ADDRESS_TOKENSALES
 // );
 
-var ipfsClient = require("ipfs-http-client");
-var ipfs = ipfsClient({
-  host: "ipfs.infura.io",
-  port: "5001",
-  protocol: "https",
-});
+// var ipfsClient = require("ipfs-http-client");
+// var ipfs = ipfsClient({
+//   host: "ipfs.infura.io",
+//   port: "5001",
+//   protocol: "https",
+// });
 
 const Dummy = {
   region: {
