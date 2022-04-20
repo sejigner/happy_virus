@@ -24,10 +24,10 @@
       <div id="button-container">
         <button class="btn-debut" type="button" id="logout"
           style="display: none; background-color: whitesmoke; color: black;" onclick="App.handleLogout()">
-          Kaikas Logout
+          Disconnect Kaikas
         </button>
         <button class="btn-debut" type="button" id="login" onclick="App.handleKaikas()">
-          Kaikas Login
+          Connect Kaikas
         </button>
       </div>
 
@@ -49,9 +49,10 @@
         <h3>Make your star's début!</h3>
       </div>
       <div class="content">
-        <span>Total potential fans: <p class="total-fans"></p></span>
-        <span>Left potential fans: <p class="left-fans"></p></span>
-        <span>Active stars: <p class="active-stars"></p></span>
+        <div>Total # of potential fans: <span id="total-fans"></span></div>
+        <div>Left # of potential fans: <span id="left-fans"></span></div>
+        <div>Active stars: <p id="active-stars"></p>
+        </div>
       </div>
       <div style="margin: auto; width: fit-content;">
         <button class="btn-debut">Début</button>

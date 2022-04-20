@@ -36,25 +36,25 @@ const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
 
 const Dummy = {
   region: {
-    "1,1": 500000,
-    "1,2": 100000,
-    "1,3": 400000,
-    "1,4": 500000,
-    "1,5": 700000,
-    "1,6": 800000,
-    "1,7": 100000,
-    "1,8": 500000,
+    "1,1": 450000,
+    "1,2": 116745000,
+    "1,3": 475840000,
+    "1,4": 2733113,
+    "1,5": 3201130,
+    "1,6": 2157245,
+    "1,7": 214000,
+    "1,8": 4847,
     "2,1": 0,
-    "2,2": 500000,
-    "2,3": 500000,
-    "2,4": 500000,
-    "2,5": 500000,
-    "2,6": 500000,
-    "2,7": 500000,
-    "2,8": 500000,
+    "2,2": 103452622,
+    "2,3": 144700110,
+    "2,4": 15620,
+    "2,5": 3235035,
+    "2,6": 50420013,
+    "2,7": 675840000,
+    "2,8": 52205593,
     "3,1": 0,
     "3,2": 0,
-    "3,3": 200566,
+    "3,3": 26205266,
     "3,4": 6504,
     "3,5": 165284,
     "3,6": 2135,
@@ -376,7 +376,8 @@ const App = {
         let population = Dummy.region[id];
         if (population !== 0) {
           let modal = document.getElementById("modal");
-          document.getElementsByClassName("total-fans").innerHTML = population;
+          console.log(document.getElementById("total-fans").innerHTML);
+          document.getElementById("total-fans").innerHTML = population;
           modal.style.display = "flex";
           // alert("Left potential fans: " + population);
         }
