@@ -282,7 +282,7 @@ const App = {
   renderNftList: function (tokenId, metadata) {
     if ("content" in document.createElement("template")) {
       // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
-      let m = document.querySelector("#all-nfts");
+      let m = document.querySelector("#grid-nft");
       let template = document.querySelector("#NftCardTemplate");
 
       // 새로운 열을 복제하고 테이블에 삽입합니다.
@@ -376,8 +376,8 @@ const App = {
         let population = Dummy.region[id];
         if (population !== 0) {
           let modal = document.getElementById("modal");
-          console.log(document.getElementById("total-fans").innerHTML);
-          document.getElementById("total-fans").innerHTML = population;
+          document.getElementById("modal-zone").innerHTML =
+            "Zone" + " (" + id + ")";
           modal.style.display = "flex";
           // alert("Left potential fans: " + population);
         }

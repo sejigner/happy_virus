@@ -3,6 +3,38 @@ body {
   color: black;
 }
 
+.tab_menu {
+  position: relative;
+}
+.tab_menu .list {
+  overflow: hidden;
+}
+.tab_menu .list li {
+  float: left;
+  margin-right: 14px;
+}
+.tab_menu .list .btn {
+  font-size: 13px;
+  color: green;
+}
+.tab_menu .list .cont {
+  display: none;
+  position: absolute;
+  background: #555;
+  color: #fff;
+  text-align: center;
+  width: 250px;
+  height: 100px;
+  line-height: 100px;
+}
+.tab_menu .list li.is_on .btn {
+  font-weight: bold;
+  color: green;
+}
+.tab_menu .list li.is_on .cont {
+  display: block;
+}
+
 .navbar-brand {
   vertical-align: middle;
 }
@@ -43,7 +75,7 @@ body {
   place-items: center;
   text-align: center;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(12, 1fr);
 }
 
 .grid-item {
@@ -96,7 +128,7 @@ body {
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   width: 400px;
-  height: 220px;
+  height: 190px;
   position: relative;
   top: -100px;
   padding: 10px;
