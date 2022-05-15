@@ -1,9 +1,12 @@
+"use strict";
+
 import Caver from "caver-js";
 import CaverExtKAS from "caver-js-ext-kas";
 import "./style.css";
 import { Spinner } from "spin.js";
 import { addMap } from "./handle-map";
 import { divideMap } from "./handle-map";
+import { get } from "http";
 
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651",
@@ -75,6 +78,8 @@ const App = {
   auth: {
     accessType: "kaikas",
     walletAddress: "",
+    selectedNft: "",
+    selectedNftImg: "",
   },
 
   //#region 계정 인증
@@ -254,18 +259,51 @@ const App = {
       );
       balance = tokenList.items.length;
       if (balance === 0) {
-        document.getElementById("myTokens").innerHTML =
+        document.getElementById("tabContent").innerHTML =
           "현재 보유한 토큰이 없습니다";
       } else {
-        for (let i = 0; i < balance; i++) {
-          (async () => {
-            const token = tokenList.items[i];
-            const tokenId = token.tokenId;
-            const tokenUri = token.tokenUri;
-            const metadata = await this.getMetadata(tokenUri);
-            this.renderNftList(tokenId, metadata);
-          })();
-        }
+        const promise = new Promise((resolve, reject) => {
+          for (let i = 0; i < balance; i++) {
+            (async () => {
+              const token = tokenList.items[i];
+              const tokenId = token.tokenId;
+              const tokenUri = token.tokenUri;
+              const metadata = await this.getMetadata(tokenUri);
+              this.renderNftList(tokenId, metadata);
+            })();
+          }
+          resolve();
+        });
+        // promise
+        //   .then(() => {
+        //     const nftItems = document.getElementsByClassName("card");
+        //     const numItem = nftItems.length;
+        //     console.log(nftItems);
+        //     console.log("length: " + numItem);
+
+        //     for (let i = 0; i < numItem; i++) {
+        //       console.log("isTesting");
+        //       const btn = itemArr[i].querySelector(".btn-theme");
+
+        //       console.log(btn);
+        //       btn.addEventListener("click", (e) => {
+        //         const selectedItem = "active";
+        //         const tgt = e.target;
+        //         console.log(tgt);
+        //         if (tgt.classList.contains(selectedItem)) {
+        //           this.auth.selectedItem = "";
+        //           tgt.classList.remove(selectedItem);
+        //         } else {
+        //           this.auth.selectedItem =
+        //             tgt.querySelector(".token-id").innerHTML;
+        //           tgt.classList.add(selectedItem);
+        //         }
+        //       });
+        //     }
+        //   })
+        //   .catch((e) => {
+        //     console.log(e);
+        //   });
       }
     } catch (e) {
       console.log(e);
@@ -293,6 +331,41 @@ const App = {
       clone.querySelector(".token-id").innerHTML = tokenId;
       clone.querySelector(".token-description").innerHTML =
         metadata.description;
+      clone.id = tokenId;
+
+      console.log("isTesting");
+      const card = clone.querySelector(".card");
+      const selectedItem = "activeCard";
+
+      card.addEventListener("click", (e) => {
+        let str = this.auth.selectedNft;
+        if (str === "") {
+          card.classList.add(selectedItem);
+          this.auth.selectedNft = tokenId;
+          this.auth.selectedNftImg = metadata.image;
+        } else if (tokenId === str) {
+          card.classList.remove(selectedItem);
+          this.auth.selectedNft = "";
+          this.auth.selectedNftImg = "";
+        } else {
+          let preSelected = document.getElementsByClassName(selectedItem)[0];
+          preSelected.classList.remove(selectedItem);
+          card.classList.add(selectedItem);
+          this.auth.selectedNft = tokenId;
+          this.auth.selectedNftImg = metadata.image;
+        }
+        this.fetchRegionInfo();
+
+        // if (card.classList.contains(selectedItem)) {
+        //   this.auth.selectedItem = arr.filter((element) => {
+        //     return element !== tokenId;
+        //   });
+        //   card.classList.remove(selectedItem);
+        // } else {
+        //   this.auth.selectedItem.push(tokenId);
+        //   card.classList.add(selectedItem);
+        // }
+      });
 
       m.appendChild(clone);
     } else {
@@ -369,9 +442,16 @@ const App = {
 
   fetchRegionInfo: function () {
     let test = document.getElementsByClassName("grid-item");
-    console.log(test);
+    const selectedNft = this.auth.selectedNft;
+    const selectedNftImg = this.auth.selectedNftImg;
+    const div = document.getElementById("no-nft");
+    const img = document.getElementById("modal-nft-img");
+    const btnInfect = document.getElementById("btn-infect");
+
     [].forEach.call(test, function (element) {
       element.onclick = function () {
+        window.scrollTo(0, 0);
+        document.body.classList.add("hidden");
         let id = element.id;
         let population = Dummy.region[id];
         if (population !== 0) {
@@ -379,6 +459,24 @@ const App = {
           document.getElementById("modal-zone").innerHTML =
             "Zone" + " (" + id + ")";
           modal.style.display = "flex";
+
+          if (selectedNft === "") {
+            img.style.display = "none";
+            img.src = "";
+            div.style.display = "block";
+            btnInfect.classList.add("inactive");
+            const location = document.querySelector("#nft-container").offsetTop;
+            div.addEventListener("click", () => {
+              window.scrollTo({ top: location, behavior: "smooth" });
+              document.body.classList.remove("hidden");
+              modal.style.display = "none";
+            });
+          } else {
+            div.style.display = "none";
+            img.style.display = "block";
+            img.src = selectedNftImg;
+            btnInfect.classList.remove("inactive");
+          }
           // alert("Left potential fans: " + population);
         }
       };
@@ -443,12 +541,14 @@ window.addEventListener("load", function () {
 const closeBtn = modal.querySelector(".close-area");
 closeBtn.addEventListener("click", (e) => {
   modal.style.display = "none";
+  document.body.classList.remove("hidden");
 });
 
 modal.addEventListener("click", (e) => {
   const evTarget = e.target;
   if (evTarget.classList.contains("modal-overlay")) {
     modal.style.display = "none";
+    document.body.classList.remove("hidden");
   }
 });
 
