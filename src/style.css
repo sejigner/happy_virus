@@ -1,38 +1,76 @@
+html,
 body {
+  height: 100vh;
   background-color: rgb(26, 26, 25);
   color: black;
 }
 
+.hidden {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.cont {
+  display: none;
+}
+
+.cont.is_on {
+  display: inherit;
+}
+
 .tab_menu {
-  position: relative;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
-.tab_menu .list {
+
+.tab_menu .tabs {
   overflow: hidden;
+  margin: 0px;
+  padding: 0px;
 }
-.tab_menu .list li {
-  float: left;
-  margin-right: 14px;
-}
-.tab_menu .list .btn {
-  font-size: 13px;
-  color: green;
-}
-.tab_menu .list .cont {
+.tab_menu .tabs .cont {
   display: none;
   position: absolute;
-  background: #555;
+  background: rgb(88, 73, 73);
   color: #fff;
   text-align: center;
   width: 250px;
   height: 100px;
   line-height: 100px;
 }
-.tab_menu .list li.is_on .btn {
-  font-weight: bold;
-  color: green;
+
+.tab_menu .tabs li {
+  float: left;
+  margin-left: 6px;
+  margin-right: 6px;
+  padding: 8px;
+  list-style: none;
+  font-size: 14px;
+  color: white;
+  border-radius: 10px;
+  background-color: #555;
 }
-.tab_menu .list li.is_on .cont {
-  display: block;
+
+.tab_menu .tabs li:hover,
+.tab_menu .tabs li.is_on {
+  border-radius: 10px;
+  margin-left: 6px;
+  margin-right: 6px;
+  padding: 8px;
+  background-color: rgb(53, 53, 53);
+  color: white;
+}
+
+.tab-content {
+  padding-top: 10px;
+}
+
+.card.activeCard {
+  outline-style: solid;
+  outline-color: yellowgreen;
+  outline-width: 3px;
 }
 
 .navbar-brand {

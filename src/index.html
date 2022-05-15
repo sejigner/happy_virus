@@ -15,32 +15,32 @@
 
 
 
-    <div class="container" style="vertical-align: middle;">
-      <a id="navbar-brand" href="">Happy Virus</a>
-      <div class="tab_menu">
-        <ul class="list">
-          <li class="is_on">
-            <a href="#tabHome" class="btn">Home</a>
-          </li>
-          <li>
-            <a href="#tabMyIdol" class="btn">My Idol</a>
-          </li>
-        </ul>
-      </div>
-      <p id="wallet-address" style="color:whitesmoke; vertical-align: middle; margin: 0;"></p>
+    <div class="container" style="display: flex ; flex-direction: column;">
+      <a id="navbar-brand" href="" style="margin-bottom: 10px;">Happy Virus</a>
+
       <div id="button-container">
-        <button class="btn-debut" type="button" id="logout"
-          style="display: none; background-color: whitesmoke; color: black;" onclick="App.handleLogout()">
+        <button class="btn-theme alt" type="button" id="logout" onclick="App.handleLogout()">
           Disconnect Kaikas
         </button>
-        <button class="btn-debut" type="button" id="login" onclick="App.handleKaikas()">
+        <button class="btn-theme" type="button" id="login" onclick="App.handleKaikas()">
           Connect Kaikas
         </button>
+      </div>
+      <p id="wallet-address"></p>
+      <div class="tab_menu">
+        <ul class="tabs">
+          <li class="tab-btn is_on" data-tab="tabHome">
+            Home
+          </li>
+          <li class="tab-btn" data-tab="tabStatus">
+            Status
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <div id="tabHome" class="cont">
+  <div id="tabHome" class="cont is_on">
     <div class="container-fluid" id="game-map">
       <div id="map-img" style="position:relative">
         <div class="wrapper" id="map-grid" style="position: absolute;">
@@ -107,7 +107,7 @@
 
   </div>
 
-  <div id="tabMyIdol" class="cont">Tab MyIdol</div>
+  <div id="tabStatus" class="cont"></div>
 
 </body>
 <!-- 부트스트랩 패널을 이용한 템플릿 활용 -->

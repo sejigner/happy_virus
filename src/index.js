@@ -408,6 +408,27 @@ const App = {
 };
 
 window.App = App;
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("hello world");
+
+  let tabsBtn = document.getElementsByClassName("tab-btn");
+  console.log(tabsBtn.length);
+  for (let i = 0; i < tabsBtn.length; i++) {
+    tabsBtn[i].addEventListener("click", (e) => {
+      const tgt = e.target;
+      const tab_id = tgt.getAttribute("data-tab");
+      console.log(tab_id);
+      document
+        .getElementsByClassName("tab-btn is_on")[0]
+        .classList.remove("is_on");
+      document.getElementsByClassName("cont")[0].classList.remove("is_on");
+      document.getElementsByClassName("cont")[1].classList.remove("is_on");
+
+      tgt.classList.add("is_on");
+      document.getElementById(tab_id).classList.add("is_on");
+    });
+  }
+});
 
 window.addEventListener("load", function () {
   try {
