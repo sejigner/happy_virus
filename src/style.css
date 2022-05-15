@@ -214,10 +214,25 @@ body {
   color: black;
 }
 
+#modal .content .modal-nft-info {
+  width: 70%;
+  height: 200px;
+  overflow: hidden;
+}
+
+#modal .content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 20px;
+}
+
 .grid-item:hover {
   background-color: rgba(0, 0, 0, 0.489);
 }
 
-#account-address {
-  float: right;
+#wallet-address {
+  color: whitesmoke;
+  margin-top: 10px;
+  margin-bottom: 0px;
 }
