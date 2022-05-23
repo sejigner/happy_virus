@@ -6,7 +6,33 @@ import "./style.css";
 import { Spinner } from "spin.js";
 import { addMap } from "./handle-map";
 import { divideMap } from "./handle-map";
-import { get } from "http";
+// import { get } from "http";
+
+// Firebase
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getDatabase, ref, child, get, set } from "firebase/database";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD0Fn7PxDHpY4FyZW_G1MH4fjDfsSr7_eo",
+  authDomain: "happy-virus.firebaseapp.com",
+  projectId: "happy-virus",
+  storageBucket: "happy-virus.appspot.com",
+  messagingSenderId: "26588171202",
+  appId: "1:26588171202:web:4322449470cdbe0b4be45b",
+  measurementId: "G-4MR9FEQG6M",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const database = getDatabase(app);
+const dbRef = ref(getDatabase());
 
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651",
@@ -133,6 +159,7 @@ const App = {
           console.log("account status: " + account);
           if (typeof account !== "undefined") {
             this.changeUIWithWallet(account);
+            this.handleWalletOnFirebase(account);
           } else {
             this.handleLogout();
           }
@@ -240,6 +267,7 @@ const App = {
               sessionStorage.setItem("isLogout", false);
             }
             this.changeUIWithWallet(account);
+            this.handleWalletOnFirebase(account);
           })
           .catch(async (error) => {
             console.log(error);
@@ -248,6 +276,7 @@ const App = {
             const account = await window.klaytn.selectedAddress;
             this.auth.walletAddress = account;
             this.changeUIWithWallet(account);
+            this.handleWalletOnFirebase(account);
           });
       } catch (error) {
         console.error(error);
@@ -277,6 +306,20 @@ const App = {
     // $("#wallet-address").append("<br>" + "<p>" + "내 계정 주소: " + account + "</p>");
     // await this.displayAllTokensWithWallet(account);
     // await this.checkApprovalWithWallet(account);
+  },
+
+  handleWalletOnFirebase: function (account) {
+    get(child(dbRef, `users/${account}`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log(snapshot.val());
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   },
 
   removeWallet: function () {
