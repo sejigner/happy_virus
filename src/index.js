@@ -8,11 +8,34 @@ import { addMap } from "./handle-map";
 import { divideMap } from "./handle-map";
 // import { get } from "http";
 
+const config = {
+  rpcURL: "https://api.baobab.klaytn.net:8651",
+};
+
+const accessKeyId = "KASKU7Q44KX5YYU3Z4CICRT9";
+const secretAccessKey = "V-U2Cd5bg9OAdYU8gbXb1YSh9nqI2g4e10joLZgp";
+// Cypress 8217 Baobab 1001
+const chainId = 8217;
+// NFT 발행 후 NFT 컨트랙트 address 입력
+// Krafterspace : 0x9faccd9f9661dddec3971c1ee146516127c34fc1
+// KIP17 API를 활용해 조회하려면, 해당 계정이 배포한 컨트랙트만 조회가능합니다.
+const nftAddress = "0x9faccd9f9661dddec3971c1ee146516127c34fc1";
+
+const cav = new Caver(config.rpcURL);
+const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
+
 // Firebase
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase, ref, child, get, set } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  child,
+  get,
+  set,
+  onChildAdded,
+} from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -32,23 +55,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase(app);
-const dbRef = ref(getDatabase());
 
-const config = {
-  rpcURL: "https://api.baobab.klaytn.net:8651",
-};
-
-const accessKeyId = "KASKU7Q44KX5YYU3Z4CICRT9";
-const secretAccessKey = "V-U2Cd5bg9OAdYU8gbXb1YSh9nqI2g4e10joLZgp";
-// Cypress 8217 Baobab 1001
-const chainId = 8217;
-// NFT 발행 후 NFT 컨트랙트 address 입력
-// Krafterspace : 0x9faccd9f9661dddec3971c1ee146516127c34fc1
-// KIP17 API를 활용해 조회하려면, 해당 계정이 배포한 컨트랙트만 조회가능합니다.
-const nftAddress = "0x9faccd9f9661dddec3971c1ee146516127c34fc1";
-
-const cav = new Caver(config.rpcURL);
-const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
+let nftRef;
+let nftListener;
 
 // const ostContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
 // const tsContract = new cav.klay.Contract(
@@ -159,7 +168,7 @@ const App = {
           console.log("account status: " + account);
           if (typeof account !== "undefined") {
             this.changeUIWithWallet(account);
-            this.handleWalletOnFirebase(account);
+            this.setFirebase(account);
           } else {
             this.handleLogout();
           }
@@ -276,7 +285,7 @@ const App = {
             const account = await window.klaytn.selectedAddress;
             this.auth.walletAddress = account;
             this.changeUIWithWallet(account);
-            this.handleWalletOnFirebase(account);
+            this.setFirebase(account, nftRef, nftListener);
           });
       } catch (error) {
         console.error(error);
@@ -286,12 +295,36 @@ const App = {
     }
   },
 
+  setFirebase: async function (account) {
+    nftRef = ref(database, `users/${account}`);
+    nftListener = onChildAdded(nftRef, (data) => {
+      renderNftElement(
+        data.key,
+        data.val().nftTitle,
+        data.val().imageUrl,
+        data.val().timestamp
+      );
+    });
+  },
+  // TODO : 등록된 NFT 불러와서 렌더링
+  renderNftElement: async function (tokenId, nftTitle, imageUrl, timestamp) {},
+
+  removeListener: function () {
+    if (nftRef !== "undefined") {
+      nftRef.off();
+    }
+    if (nftListener !== "undefined") {
+      nftListener.off();
+    }
+  },
+
   handleLogout: async function () {
     sessionStorage.setItem("isLogout", "true");
     document.getElementById("wallet-address").innerHTML = "";
     document.getElementById("wallet-address").style.display = "none";
     this.auth.walletAddress = "";
     this.removeWallet();
+    this.removeListener();
     location.reload();
   },
 
@@ -306,20 +339,6 @@ const App = {
     // $("#wallet-address").append("<br>" + "<p>" + "내 계정 주소: " + account + "</p>");
     // await this.displayAllTokensWithWallet(account);
     // await this.checkApprovalWithWallet(account);
-  },
-
-  handleWalletOnFirebase: function (account) {
-    get(child(dbRef, `users/${account}`))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log(snapshot.val());
-        } else {
-          console.log("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   },
 
   removeWallet: function () {
