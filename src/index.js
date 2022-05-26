@@ -36,6 +36,7 @@ import {
   set,
   onChildAdded,
 } from "firebase/database";
+import { off } from "process";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -153,14 +154,20 @@ const App = {
   auth: {
     accessType: "kaikas",
     walletAddress: "",
+  },
+
+  nft: {
     selectedNft: "",
     selectedNftImg: "",
   },
 
   //#region 계정 인증
 
-  start: async function () {
-    if (sessionStorage.getItem("isLogout") === "false") {
+  handleRefresh: async function () {
+    if (
+      sessionStorage.getItem("isLogout") === "false" ||
+      sessionStorage.getItem("isLogout") === null
+    ) {
       try {
         if (typeof window.klaytn !== "undefined") {
           const provider = window["klaytn"];
@@ -168,7 +175,6 @@ const App = {
           console.log("account status: " + account);
           if (typeof account !== "undefined") {
             this.changeUIWithWallet(account);
-            this.setFirebase(account);
           } else {
             this.handleLogout();
           }
@@ -179,6 +185,49 @@ const App = {
         console.log(e);
       }
     }
+  },
+
+  initAccount: async function () {
+    try {
+      if (typeof window.klaytn !== "undefined") {
+        const provider = window["klaytn"];
+        let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
+        isKaikasUnlocked
+          .then(async function (isUnlocked) {
+            if (await provider.enable()) {
+              const account = await provider.selectedAddress;
+
+              console.log("account status: " + account);
+              if (typeof account !== "undefined") {
+                sessionStorage.setItem("isLogout", false);
+                App.auth.walletAddress = account;
+                App.changeUIWithWallet(account);
+                App.loadNftsFromFirebase(account);
+              } else {
+                alert("접근 가능한 계정이 없습니다.");
+                App.handleLogout();
+              }
+            } else {
+              alert("카이카스 로그인이 거부되었습니다.");
+              console.log("로그인 거부");
+            }
+          })
+          .catch(async (error) => {
+            console.log(error);
+            // const accounts = await window.klaytn.enable();
+            // // 현재 kaikas에 선택된 공개키
+            // const account = await window.klaytn.selectedAddress;
+
+            // this.changeUIWithWallet(account);
+            // this.setFirebase(account, nftRef, nftListener);
+          });
+      } else {
+        alert("카이카스 크롬 확장 프로그램을 설치해주세요.");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
     // if (walletFromSession) {
     //   try {
     //     cav.klay.accounts.wallet.add(JSON.parse(walletFromSession));
@@ -210,7 +259,7 @@ const App = {
   //         $("#message").text("유효하지 않은 keystore 파일입니다.");
   //         return;
   //       }
-  //       this.auth.keystore = event.target.result;
+  //       this.nft.keystore = event.target.result;
   //       $("#message").text("keystore 통과. 비밀번호를 입력하세요.");
   //       document.querySelector("#input-password").focus();
   //     } catch (event) {
@@ -221,15 +270,15 @@ const App = {
   // },
 
   // handlePassword: async function () {
-  //   this.auth.password = event.target.value;
+  //   this.nft.password = event.target.value;
   // },
 
   // handleLogin: async function () {
-  //   if (this.auth.accessType === "keystore") {
+  //   if (this.nft.accessType === "keystore") {
   //     try {
   //       const privateKey = cav.klay.accounts.decrypt(
-  //         this.auth.keystore,
-  //         this.auth.password
+  //         this.nft.keystore,
+  //         this.nft.password
   //       ).privateKey;
   //       this.integrateWallet(privateKey);
   //     } catch (e) {
@@ -271,21 +320,24 @@ const App = {
         let isKaikasUnlocked = klaytn._kaikas.isUnlocked();
         isKaikasUnlocked
           .then(async function (isUnlocked) {
-            const account = await window.klaytn.selectedAddress;
-            if (await klaytn._kaikas.isEnabled()) {
+            if (await window.klaytn.enable()) {
+              const account = await window.klaytn.selectedAddress;
               sessionStorage.setItem("isLogout", false);
+              this.auth.walletAddress = account;
+              // if문 밖에 있던 두 코드를 안에 넣음
+              // TODO: Fix Issue #15
+              this.changeUIWithWallet(account);
+              this.setFirebase(account);
             }
-            this.changeUIWithWallet(account);
-            this.handleWalletOnFirebase(account);
           })
           .catch(async (error) => {
             console.log(error);
-            const accounts = await window.klaytn.enable();
-            // 현재 kaikas에 선택된 공개키
-            const account = await window.klaytn.selectedAddress;
-            this.auth.walletAddress = account;
-            this.changeUIWithWallet(account);
-            this.setFirebase(account, nftRef, nftListener);
+            // const accounts = await window.klaytn.enable();
+            // // 현재 kaikas에 선택된 공개키
+            // const account = await window.klaytn.selectedAddress;
+
+            // this.changeUIWithWallet(account);
+            // this.setFirebase(account, nftRef, nftListener);
           });
       } catch (error) {
         console.error(error);
@@ -295,10 +347,10 @@ const App = {
     }
   },
 
-  setFirebase: async function (account) {
+  loadNftsFromFirebase: async function (account) {
     nftRef = ref(database, `users/${account}`);
     nftListener = onChildAdded(nftRef, (data) => {
-      renderNftElement(
+      this.renderNftElement(
         data.key,
         data.val().nftTitle,
         data.val().imageUrl,
@@ -310,12 +362,7 @@ const App = {
   renderNftElement: async function (tokenId, nftTitle, imageUrl, timestamp) {},
 
   removeListener: function () {
-    if (nftRef !== "undefined") {
-      nftRef.off();
-    }
-    if (nftListener !== "undefined") {
-      nftListener.off();
-    }
+    off();
   },
 
   handleLogout: async function () {
@@ -393,10 +440,10 @@ const App = {
         //         const tgt = e.target;
         //         console.log(tgt);
         //         if (tgt.classList.contains(selectedItem)) {
-        //           this.auth.selectedItem = "";
+        //           this.nft.selectedItem = "";
         //           tgt.classList.remove(selectedItem);
         //         } else {
-        //           this.auth.selectedItem =
+        //           this.nft.selectedItem =
         //             tgt.querySelector(".token-id").innerHTML;
         //           tgt.classList.add(selectedItem);
         //         }
@@ -440,31 +487,31 @@ const App = {
       const selectedItem = "activeCard";
 
       card.addEventListener("click", (e) => {
-        let str = this.auth.selectedNft;
+        let str = this.nft.selectedNft;
         if (str === "") {
           card.classList.add(selectedItem);
-          this.auth.selectedNft = tokenId;
-          this.auth.selectedNftImg = metadata.image;
+          this.nft.selectedNft = tokenId;
+          this.nft.selectedNftImg = metadata.image;
         } else if (tokenId === str) {
           card.classList.remove(selectedItem);
-          this.auth.selectedNft = "";
-          this.auth.selectedNftImg = "";
+          this.nft.selectedNft = "";
+          this.nft.selectedNftImg = "";
         } else {
           let preSelected = document.getElementsByClassName(selectedItem)[0];
           preSelected.classList.remove(selectedItem);
           card.classList.add(selectedItem);
-          this.auth.selectedNft = tokenId;
-          this.auth.selectedNftImg = metadata.image;
+          this.nft.selectedNft = tokenId;
+          this.nft.selectedNftImg = metadata.image;
         }
         this.fetchRegionInfo();
 
         // if (card.classList.contains(selectedItem)) {
-        //   this.auth.selectedItem = arr.filter((element) => {
+        //   this.nft.selectedItem = arr.filter((element) => {
         //     return element !== tokenId;
         //   });
         //   card.classList.remove(selectedItem);
         // } else {
-        //   this.auth.selectedItem.push(tokenId);
+        //   this.nft.selectedItem.push(tokenId);
         //   card.classList.add(selectedItem);
         // }
       });
@@ -474,6 +521,13 @@ const App = {
       // HTML 템플릿 엘리먼트를 지원하지 않으므로
       // 테이블에 열을 추가하는 다른 방법을 찾습니다.
     }
+  },
+
+  uploadNft: function (nftAddress, nftImgUrl, timestamp) {
+    set(ref(database, `users/${this.auth.walletAddress}/${nftAddress}`), {
+      nft_picture: nftImgUrl,
+      timestamp: timestamp,
+    });
   },
 
   getERC721MetadataSchema: function (description, title, imgUrl) {
@@ -544,8 +598,8 @@ const App = {
 
   fetchRegionInfo: function () {
     let test = document.getElementsByClassName("grid-item");
-    const selectedNft = this.auth.selectedNft;
-    const selectedNftImg = this.auth.selectedNftImg;
+    const selectedNft = this.nft.selectedNft;
+    const selectedNftImg = this.nft.selectedNftImg;
     const div = document.getElementById("no-nft");
     const img = document.getElementById("modal-nft-img");
     const btnInfect = document.getElementById("btn-infect");
@@ -577,6 +631,9 @@ const App = {
             div.style.display = "none";
             img.style.display = "block";
             img.src = selectedNftImg;
+            btnInfect.addEventListener("click", () => {
+              confirmNftModal();
+            });
             btnInfect.classList.remove("inactive");
           }
           // alert("Left potential fans: " + population);
@@ -632,9 +689,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("load", function () {
   try {
-    App.start();
     App.loadGameMap();
     App.fetchRegionInfo();
+    App.handleRefresh();
   } catch (e) {
     console.log(e);
   }
@@ -653,6 +710,30 @@ modal.addEventListener("click", (e) => {
     document.body.classList.remove("hidden");
   }
 });
+
+function confirmNftModal() {
+  if (window.confirm("이 nft로 감염시키시겠어요?")) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/${App.auth.walletAddress}/${App.nft.selectedNft}`))
+      .then((snapshot) => {
+        if (!snapshot.exists()) {
+          if (App.nft.selectedNft !== "") {
+            const nftAddress = App.nft.selectedNft;
+            const nftImgUrl = App.nft.selectedNftImg;
+            // timestamp in millisecond
+            const timestamp = Math.floor(+new Date() / 1000);
+            App.uploadNft(nftAddress, nftImgUrl, timestamp);
+            // TODO : 서비스 컨트랙트로 NFT transfer
+          }
+        } else {
+          console.log("NFT 중복 사용");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+}
 
 window.addEventListener("keyup", (e) => {
   if (modal.style.display === "flex" && e.key === "Escape") {
