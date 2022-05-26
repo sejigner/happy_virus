@@ -1,7 +1,8 @@
 import gameMap from "../src/world-map.svg";
 ("use strict");
 
-export function addMap() {
+export async function addMap() {
+  hideMap();
   const img = document.createElement("img");
   (img.alt = "game map"),
     (img.src = gameMap),
@@ -13,7 +14,7 @@ export function addMap() {
   mapContainer.appendChild(img);
 }
 
-export function divideMap() {
+export async function divideMap() {
   const mapGrid = document.getElementById("map-grid");
 
   // for (let i = 0; i < 32; i++) {
@@ -41,4 +42,12 @@ export function divideMap() {
   }
 }
 
-// export default addMap; divideMap;
+export function hideMap() {
+  const map = document.getElementById("game-map");
+  map.style.display = "none";
+}
+
+export function showMap() {
+  const map = document.getElementById("game-map");
+  map.style.display = "block";
+}

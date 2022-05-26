@@ -5,6 +5,8 @@ import CaverExtKAS from "caver-js-ext-kas";
 import "./style.css";
 import { Spinner } from "spin.js";
 import { addMap } from "./handle-map";
+import { showMap } from "./handle-map";
+import { hideMap } from "./handle-map";
 import { divideMap } from "./handle-map";
 // import { get } from "http";
 
@@ -245,9 +247,21 @@ const App = {
   //   this.changeUI(walletInstance);
   // },
 
-  loadGameMap: function () {
-    addMap();
-    divideMap();
+  loadGameMap: async function () {
+    hideMap();
+    addMap()
+      .then((result) => {
+        divideMap()
+          .then((result) => {
+            showMap();
+          })
+          .catch((error) => {
+            console.log("error" + error);
+          });
+      })
+      .catch((error) => {
+        console.log("error" + error);
+      });
   },
 
   // handleImport: async function () {
@@ -687,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-window.addEventListener("load", function () {
+window.addEventListener("load", async function () {
   try {
     App.loadGameMap();
     App.fetchRegionInfo();
