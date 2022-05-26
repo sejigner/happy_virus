@@ -375,17 +375,13 @@ const App = {
   // TODO : 등록된 NFT 불러와서 렌더링
   renderNftElement: async function (tokenId, nftTitle, imageUrl, timestamp) {},
 
-  removeListener: function () {
-    off();
-  },
-
   handleLogout: async function () {
     sessionStorage.setItem("isLogout", "true");
     document.getElementById("wallet-address").innerHTML = "";
     document.getElementById("wallet-address").style.display = "none";
     this.auth.walletAddress = "";
     this.removeWallet();
-    this.removeListener();
+    off();
     location.reload();
   },
 
