@@ -613,9 +613,17 @@ const App = {
     const img = document.getElementById("modal-nft-img");
     const btnInfect = document.getElementById("btn-infect");
 
+    if (!btnInfect.classList.contains("click-handler")) {
+      btnInfect.classList.add("click-handler");
+      btnInfect.addEventListener("click", () => {
+        if (App.nft.selectedNft !== "undefined") {
+          confirmNftModal();
+        }
+      });
+    }
+
     [].forEach.call(test, function (element) {
       element.onclick = function () {
-        console.log("clicked!");
         window.scrollTo(0, 0);
         document.body.classList.add("hidden");
         let id = element.id;
@@ -641,12 +649,8 @@ const App = {
             div.style.display = "none";
             img.style.display = "block";
             img.src = selectedNftImg;
-
-            btnInfect.addEventListener("click", () => {
-              if (App.nft.selectedNft !== "undefined") {
-                confirmNftModal();
-              }
-            });
+            
+            
             btnInfect.classList.remove("inactive");
           }
           // alert("Left potential fans: " + population);
