@@ -88,6 +88,11 @@ body {
   height: auto;
 }
 
+.small-title {
+  color: whitesmoke;
+  
+}
+
 .nav-item button {
   color: black;
 }

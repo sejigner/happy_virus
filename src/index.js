@@ -161,6 +161,7 @@ const App = {
   nft: {
     selectedNft: "",
     selectedNftImg: "",
+    selectedNftMetadata: "",
   },
 
   //#region 계정 인증
@@ -247,21 +248,11 @@ const App = {
   //   this.changeUI(walletInstance);
   // },
 
-  loadGameMap: async function () {
+  loadGameMap: function () {
     hideMap();
-    addMap()
-      .then((result) => {
-        divideMap()
-          .then((result) => {
-            showMap();
-          })
-          .catch((error) => {
-            console.log("error" + error);
-          });
-      })
-      .catch((error) => {
-        console.log("error" + error);
-      });
+    addMap();
+    divideMap();
+    showMap();
   },
 
   // handleImport: async function () {
@@ -428,7 +419,7 @@ const App = {
               const tokenId = token.tokenId;
               const tokenUri = token.tokenUri;
               const metadata = await this.getMetadata(tokenUri);
-              this.renderNftList(tokenId, metadata);
+              this.renderNftListFromKlaytn(tokenId, metadata);
             })();
           }
           resolve();
@@ -476,7 +467,9 @@ const App = {
     tokens.appendChild(template);
   },
 
-  renderNftList: function (tokenId, metadata) {
+  renderNftListFromFirebase: function (tokenId) {},
+
+  renderNftListFromKlaytn: function (tokenId, metadata) {
     if ("content" in document.createElement("template")) {
       // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
       let m = document.querySelector("#grid-nft");
@@ -502,16 +495,19 @@ const App = {
           card.classList.add(selectedItem);
           this.nft.selectedNft = tokenId;
           this.nft.selectedNftImg = metadata.image;
+          this.nft.selectedNftMetadata = metadata;
         } else if (tokenId === str) {
           card.classList.remove(selectedItem);
           this.nft.selectedNft = "";
           this.nft.selectedNftImg = "";
+          this.nft.selectedNftMetadata = "";
         } else {
           let preSelected = document.getElementsByClassName(selectedItem)[0];
           preSelected.classList.remove(selectedItem);
           card.classList.add(selectedItem);
           this.nft.selectedNft = tokenId;
           this.nft.selectedNftImg = metadata.image;
+          this.nft.selectedNftMetadata = metadata;
         }
         this.fetchRegionInfo();
 
@@ -533,9 +529,11 @@ const App = {
     }
   },
 
-  uploadNft: function (nftAddress, nftImgUrl, timestamp) {
+  uploadNft: function (nftAddress, nftMetadata, timestamp) {
     set(ref(database, `users/${this.auth.walletAddress}/${nftAddress}`), {
-      nft_picture: nftImgUrl,
+      name: nftMetadata.name,
+      image: nftMetadata.image,
+      description: nftMetadata.description,
       timestamp: timestamp,
     });
   },
@@ -607,6 +605,7 @@ const App = {
   },
 
   fetchRegionInfo: function () {
+    console.log("Region infos fetched");
     let test = document.getElementsByClassName("grid-item");
     const selectedNft = this.nft.selectedNft;
     const selectedNftImg = this.nft.selectedNftImg;
@@ -616,6 +615,7 @@ const App = {
 
     [].forEach.call(test, function (element) {
       element.onclick = function () {
+        console.log("clicked!");
         window.scrollTo(0, 0);
         document.body.classList.add("hidden");
         let id = element.id;
@@ -641,8 +641,11 @@ const App = {
             div.style.display = "none";
             img.style.display = "block";
             img.src = selectedNftImg;
+
             btnInfect.addEventListener("click", () => {
-              confirmNftModal();
+              if (App.nft.selectedNft !== "undefined") {
+                confirmNftModal();
+              }
             });
             btnInfect.classList.remove("inactive");
           }
@@ -697,7 +700,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-window.addEventListener("load", async function () {
+window.addEventListener("load", function () {
   try {
     App.loadGameMap();
     App.fetchRegionInfo();
@@ -722,26 +725,13 @@ modal.addEventListener("click", (e) => {
 });
 
 function confirmNftModal() {
-  if (window.confirm("이 nft로 감염시키시겠어요?")) {
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/${App.auth.walletAddress}/${App.nft.selectedNft}`))
-      .then((snapshot) => {
-        if (!snapshot.exists()) {
-          if (App.nft.selectedNft !== "") {
-            const nftAddress = App.nft.selectedNft;
-            const nftImgUrl = App.nft.selectedNftImg;
-            // timestamp in millisecond
-            const timestamp = Math.floor(+new Date() / 1000);
-            App.uploadNft(nftAddress, nftImgUrl, timestamp);
-            // TODO : 서비스 컨트랙트로 NFT transfer
-          }
-        } else {
-          console.log("NFT 중복 사용");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  if (confirm("이 nft로 감염시키시겠어요?")) {
+    const nftAddress = App.nft.selectedNft;
+    const nftMetadata = App.nft.selectedNftMetadata;
+    // timestamp in millisecond
+    const timestamp = Math.floor(+new Date() / 1000);
+    App.uploadNft(nftAddress, nftMetadata, timestamp);
+    // TODO : 서비스 컨트랙트로 NFT transfer
   }
 }
 

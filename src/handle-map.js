@@ -14,7 +14,7 @@ export async function addMap() {
   mapContainer.appendChild(img);
 }
 
-export async function divideMap() {
+export function divideMap() {
   const mapGrid = document.getElementById("map-grid");
 
   // for (let i = 0; i < 32; i++) {
@@ -35,9 +35,9 @@ export async function divideMap() {
     const element = document.createElement("div");
     element.className = "grid-item";
     element.id = vertical + "," + horizontal;
-    element.innerHTML = element.id;
+    // element.innerHTML = element.id;
     // element.style./
-    console.log(element.id);
+    // console.log(element.id);
     mapGrid.appendChild(element);
   }
 }
