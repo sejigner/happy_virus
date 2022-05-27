@@ -205,11 +205,10 @@ const App = {
               if (typeof account !== "undefined") {
                 sessionStorage.setItem("isLogout", false);
                 App.auth.walletAddress = account;
-                console.log("wallet address : " + App.auth.walletAddress);
                 App.changeUIWithWallet(account);
-                App.loadNftsFromFirebase(account);
+                App.fetchNftsFromFirebase(account);
               } else {
-                alert("접근 가능한 계정이 없습니다.");
+                alert("지갑 접근에 실패하였습니다. 다시 시도해주세요.");
                 App.handleLogout();
               }
             } else {
@@ -354,9 +353,14 @@ const App = {
     }
   },
 
-  loadNftsFromFirebase: async function (account) {
+  fetchNftsFromFirebase: async function (account) {
     nftRef = ref(database, `users/${account}`);
     nftListener = onChildAdded(nftRef, (data) => {
+      
+      if (!document.getElementsByClassName("noNft asset")[0].classList.contains("noNft inactive")) {
+        console.log("There are children!");
+        document.getElementsByClassName("noNft asset")[0].classList.add("inactive")
+      }
       this.renderNftElement(
         data.key,
         data.val().nftTitle,
@@ -382,6 +386,7 @@ const App = {
     document.getElementById("login").style.display = "none";
     document.getElementById("logout").style.display = "inline";
     document.getElementsByClassName("afterLogin")[0].style.display = "block";
+    document.getElementsByClassName("assetContainer")[0].style.display = "block";
     document.getElementById("wallet-address").style.display = "block";
     document.getElementById("wallet-address").innerHTML = account;
     await this.displayMyTokens(account);
@@ -410,10 +415,7 @@ const App = {
         account
       );
       balance = tokenList.items.length;
-      if (balance === 0) {
-        document.getElementById("tabContent").innerHTML =
-          "현재 보유한 토큰이 없습니다";
-      } else {
+      if (balance !== 0) {
         const promise = new Promise((resolve, reject) => {
           for (let i = 0; i < balance; i++) {
             (async () => {
@@ -426,36 +428,7 @@ const App = {
           }
           resolve();
         });
-        // promise
-        //   .then(() => {
-        //     const nftItems = document.getElementsByClassName("card");
-        //     const numItem = nftItems.length;
-        //     console.log(nftItems);
-        //     console.log("length: " + numItem);
-
-        //     for (let i = 0; i < numItem; i++) {
-        //       console.log("isTesting");
-        //       const btn = itemArr[i].querySelector(".btn-theme");
-
-        //       console.log(btn);
-        //       btn.addEventListener("click", (e) => {
-        //         const selectedItem = "active";
-        //         const tgt = e.target;
-        //         console.log(tgt);
-        //         if (tgt.classList.contains(selectedItem)) {
-        //           this.nft.selectedItem = "";
-        //           tgt.classList.remove(selectedItem);
-        //         } else {
-        //           this.nft.selectedItem =
-        //             tgt.querySelector(".token-id").innerHTML;
-        //           tgt.classList.add(selectedItem);
-        //         }
-        //       });
-        //     }
-        //   })
-        //   .catch((e) => {
-        //     console.log(e);
-        //   });
+        document.getElementsByClassName("noNft home")[0].style.display = "none"
       }
     } catch (e) {
       console.log(e);
@@ -468,8 +441,6 @@ const App = {
     this.getBasicTemplate(tokenId, metadata);
     tokens.appendChild(template);
   },
-
-  renderNftListFromFirebase: function (tokenId) {},
 
   renderNftListFromKlaytn: function (tokenId, metadata) {
     if ("content" in document.createElement("template")) {
@@ -615,12 +586,14 @@ const App = {
     const div = document.getElementById("no-nft");
     const img = document.getElementById("modal-nft-img");
     const btnInfect = document.getElementById("btn-infect");
+    const modal = document.getElementById("modal");
 
     if (!btnInfect.classList.contains("click-handler")) {
       btnInfect.classList.add("click-handler");
       btnInfect.addEventListener("click", () => {
         if (App.nft.selectedNft !== "undefined") {
           confirmNftModal();
+          modal.style.display = "none";
         }
       });
     }
@@ -632,7 +605,6 @@ const App = {
         let id = element.id;
         let population = Dummy.region[id];
         if (population !== 0) {
-          let modal = document.getElementById("modal");
           document.getElementById("modal-zone").innerHTML =
             "Zone" + " (" + id + ")";
           modal.style.display = "flex";
