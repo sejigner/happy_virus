@@ -134,6 +134,7 @@ body {
   background-color: rgb(73, 73, 73);
   color: rgb(120, 119, 119);
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-theme {
