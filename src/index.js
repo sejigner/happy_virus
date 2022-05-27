@@ -175,6 +175,7 @@ const App = {
         if (typeof window.klaytn !== "undefined") {
           const provider = window["klaytn"];
           const account = await provider.selectedAddress;
+          this.auth.walletAddress = account;
           console.log("account status: " + account);
           if (typeof account !== "undefined") {
             this.changeUIWithWallet(account);
@@ -204,6 +205,7 @@ const App = {
               if (typeof account !== "undefined") {
                 sessionStorage.setItem("isLogout", false);
                 App.auth.walletAddress = account;
+                console.log("wallet address : " + App.auth.walletAddress);
                 App.changeUIWithWallet(account);
                 App.loadNftsFromFirebase(account);
               } else {
@@ -530,6 +532,7 @@ const App = {
   },
 
   uploadNft: function (nftAddress, nftMetadata, timestamp) {
+    console.log("wallet" + this.auth.walletAddress);
     set(ref(database, `users/${this.auth.walletAddress}/${nftAddress}`), {
       name: nftMetadata.name,
       image: nftMetadata.image,
@@ -649,8 +652,7 @@ const App = {
             div.style.display = "none";
             img.style.display = "block";
             img.src = selectedNftImg;
-            
-            
+
             btnInfect.classList.remove("inactive");
           }
           // alert("Left potential fans: " + population);
@@ -744,7 +746,6 @@ window.addEventListener("keyup", (e) => {
     modal.style.display = "none";
   }
 });
-
 
 // klaytn.on("accountsChanged", function (accounts) {
 //   if
