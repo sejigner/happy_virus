@@ -30,14 +30,7 @@ const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import {
-  getDatabase,
-  ref,
-  child,
-  get,
-  set,
-  onChildAdded,
-} from "firebase/database";
+import { getDatabase, ref, remove, set, onChildAdded } from "firebase/database";
 import { off } from "process";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -206,7 +199,6 @@ const App = {
                 sessionStorage.setItem("isLogout", false);
                 App.auth.walletAddress = account;
                 App.changeUIWithWallet(account);
-                App.fetchNftsFromFirebase(account);
               } else {
                 alert("지갑 접근에 실패하였습니다. 다시 시도해주세요.");
                 App.handleLogout();
@@ -356,21 +348,18 @@ const App = {
   fetchNftsFromFirebase: async function (account) {
     nftRef = ref(database, `users/${account}`);
     nftListener = onChildAdded(nftRef, (data) => {
-      
-      if (!document.getElementsByClassName("noNft asset")[0].classList.contains("noNft inactive")) {
-        console.log("There are children!");
-        document.getElementsByClassName("noNft asset")[0].classList.add("inactive")
+      if (
+        !document
+          .getElementsByClassName("noNft asset")[0]
+          .classList.contains("noNft inactive")
+      ) {
+        document
+          .getElementsByClassName("noNft asset")[0]
+          .classList.add("inactive");
       }
-      this.renderNftElement(
-        data.key,
-        data.val().nftTitle,
-        data.val().imageUrl,
-        data.val().timestamp
-      );
+      this.renderNftListToAsset(data.key, data.val());
     });
   },
-  // TODO : 등록된 NFT 불러와서 렌더링
-  renderNftElement: async function (tokenId, nftTitle, imageUrl, timestamp) {},
 
   handleLogout: async function () {
     sessionStorage.setItem("isLogout", "true");
@@ -386,14 +375,12 @@ const App = {
     document.getElementById("login").style.display = "none";
     document.getElementById("logout").style.display = "inline";
     document.getElementsByClassName("afterLogin")[0].style.display = "block";
-    document.getElementsByClassName("assetContainer")[0].style.display = "block";
+    document.getElementsByClassName("assetContainer")[0].style.display =
+      "block";
     document.getElementById("wallet-address").style.display = "block";
     document.getElementById("wallet-address").innerHTML = account;
     await this.displayMyTokens(account);
-
-    // $("#wallet-address").append("<br>" + "<p>" + "내 계정 주소: " + account + "</p>");
-    // await this.displayAllTokensWithWallet(account);
-    // await this.checkApprovalWithWallet(account);
+    await this.fetchNftsFromFirebase(account);
   },
 
   removeWallet: function () {
@@ -423,26 +410,69 @@ const App = {
               const tokenId = token.tokenId;
               const tokenUri = token.tokenUri;
               const metadata = await this.getMetadata(tokenUri);
-              this.renderNftListFromKlaytn(tokenId, metadata);
+              this.renderNftListToHome(tokenId, metadata);
             })();
           }
           resolve();
         });
-        document.getElementsByClassName("noNft home")[0].style.display = "none"
+        document.getElementsByClassName("noNft home")[0].style.display = "none";
       }
     } catch (e) {
       console.log(e);
     }
   },
 
-  renderMyTokens: function (tokenId, metadata) {
-    let tokens = document.getElementById("myTokens");
-    let template = document.getElementById("MyTokensTemplate");
-    this.getBasicTemplate(tokenId, metadata);
-    tokens.appendChild(template);
+  renderNftListToAsset: async function (tokenId, metadata) {
+    const imgUrl = metadata.image;
+    const title = metadata.name;
+    const timestamp = metadata.timestamp;
+    const description = metadata.description;
+
+    if ("content" in document.createElement("template")) {
+      // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
+      let m = document.querySelector("#grid-active-nft");
+      let template = document.querySelector("#ActiveNftCardTemplate");
+
+      // 새로운 열을 복제하고 테이블에 삽입합니다.
+      let clone = template.content.cloneNode(true);
+      clone.querySelector(".card-img-top").src = imgUrl;
+      clone.querySelector(".card-title").innerHTML =
+        "<strong>" + title + "</strong>";
+      clone.querySelector(".token-id").innerHTML = tokenId;
+      clone.querySelector(".token-description").innerHTML = description;
+      clone.querySelector(".token-infection").innerHTML = timestamp;
+      clone.id = tokenId;
+
+      const btn = clone.querySelector("#btn-deactivate");
+
+      btn.addEventListener("click", (e) => {
+        const account = this.auth.walletAddress;
+        if (confirm("바이러스를 비활성화하시겠어요?")) {
+          if (account !== "") {
+            const tRef = ref(database, `users/${account}/${tokenId}`);
+            remove(tRef)
+              .then(() => {
+                const token = document.querySelector("#"+tokenId);
+                console.log("token" + token);
+                m.removeChild(token);
+                alert("바이러스가 비활성화되었습니다.");
+              })
+              .catch((error) => {
+                console.log("firebase 삭제 에러 발생: " + error);
+                alert("오류가 발생하였습니다. 잠시 후 다시 시도해주세요.");
+              });
+          }
+        }
+      });
+
+      m.appendChild(clone);
+    } else {
+      // HTML 템플릿 엘리먼트를 지원하지 않으므로
+      // 테이블에 열을 추가하는 다른 방법을 찾습니다.
+    }
   },
 
-  renderNftListFromKlaytn: function (tokenId, metadata) {
+  renderNftListToHome: function (tokenId, metadata) {
     if ("content" in document.createElement("template")) {
       // 기존 HTML tbody 와 템플릿 열로 테이블을 인스턴스화합니다.
       let m = document.querySelector("#grid-nft");
@@ -458,9 +488,8 @@ const App = {
         metadata.description;
       clone.id = tokenId;
 
-      console.log("isTesting");
       const card = clone.querySelector(".card");
-      const selectedItem = "activeCard";
+      const selectedItem = "selectedCard";
 
       card.addEventListener("click", (e) => {
         let str = this.nft.selectedNft;

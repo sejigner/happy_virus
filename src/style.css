@@ -67,7 +67,13 @@ body {
   padding-top: 10px;
 }
 
-.card.activeCard {
+.card.selectedCard {
+  outline-style: solid;
+  outline-color: yellowgreen;
+  outline-width: 3px;
+}
+
+.card.selectedActiveCard {
   outline-style: solid;
   outline-color: yellowgreen;
   outline-width: 3px;
