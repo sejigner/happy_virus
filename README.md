@@ -7,19 +7,20 @@
 - Swap : 1 Human의 가치=(전체 Human 코인 개수 /보상풀 내에 존재하는 클레이) 보상풀로 human전송 <-> Klay 지급 
 - 매달 스왑 비율 고지
 
-## 스마트 컨트랙트 빌드
+## 빌드 정보
+### 스마트 컨트랙트 빌드
 
 > truffle migrate --compile-all --reset --network klaytn
 
-## NODE 모듈 설치
+### NODE 모듈 설치
 
 > npm install
 
-## frontend 실행
+### frontend 실행
 
 > npm run dev
 
-## 버전정보(Lecture)
+### 버전정보(Lecture)
 
 > node 버전: 16.13.0
 
