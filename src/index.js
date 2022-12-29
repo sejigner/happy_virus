@@ -30,7 +30,7 @@ const caverExtKas = new CaverExtKAS(chainId, accessKeyId, secretAccessKey);
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase, ref, remove, set, onChildAdded } from "firebase/database";
+import { getDatabase, ref, remove, set, onChildAdded, onChildRemoved } from "firebase/database";
 import { off } from "process";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -452,10 +452,8 @@ const App = {
             const tRef = ref(database, `users/${account}/${tokenId}`);
             remove(tRef)
               .then(() => {
-                const token = document.querySelector("#"+tokenId);
-                console.log("token" + token);
-                m.removeChild(token);
                 alert("바이러스가 비활성화되었습니다.");
+                this.displayMyTokens(account);
               })
               .catch((error) => {
                 console.log("firebase 삭제 에러 발생: " + error);
@@ -738,6 +736,7 @@ function confirmNftModal() {
     // timestamp in millisecond
     const timestamp = Math.floor(+new Date() / 1000);
     App.uploadNft(nftAddress, nftMetadata, timestamp);
+    document.body.classList.remove("hidden");
     // TODO : 서비스 컨트랙트로 NFT transfer
   }
 }
