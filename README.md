@@ -1,7 +1,6 @@
 # NFT P2E Project - Happy Virus
 
 - 지갑 연결하면 NFT 정보 조회
-- 게임에 사용할 때 "사용 중에는 컨트랙트에 NFT가 옮겨집니다. 회수를 요청하시면 다시 돌려드립니다." 안내
 - NFT 전송 허용하면 NFT 주소를 파이어베이스 해당 계정 노드와 Zone 노드에 저장(TimeStamp, Property, Zone)
 - Claim : 해당 NFT의 TimeStamp 값을 호출하여 지급 가능 개수 전달 -> claim된 human 코인만큼 timestamp 차감 (유저 지갑에 human 코인 전송(가스비))
 - Swap : 1 Human의 가치=(전체 Human 코인 개수 /보상풀 내에 존재하는 클레이) 보상풀로 human전송 <-> Klay 지급 
